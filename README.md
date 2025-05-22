@@ -14,3 +14,12 @@ git clone命令克隆本项目，即可完成所有节点的安装。
 
 3、RGB or HEX Convert to DEC 将十六进制颜色码和RBG转换成十进制
 ![image](https://github.com/user-attachments/assets/92b7a954-3c91-44d0-aa21-6eecea840aad)
+
+4、CropTransparentEdges 按透明区域裁剪
+![微信截图_20250522224212](https://github.com/user-attachments/assets/22ad3e94-2ce2-425d-996d-43098dd04b8a)
+
+5、ImageToMaskWithAlpha 将图片转换成带有alpha通道的遮罩
+![微信截图_20250522223903](https://github.com/user-attachments/assets/e0244459-bf0e-44dd-8cac-f35ea527bdcc)
+
+6、NumericSlider数字滑块，包含浮点数和整数
+![微信截图_20250522223929](https://github.com/user-attachments/assets/08de6738-945b-4c56-9747-cc829d047124)
