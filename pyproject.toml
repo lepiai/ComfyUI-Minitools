@@ -1,7 +1,7 @@
 [project]
-name = "minitools"
-description = "ComfyUI Mini Toolkit – Helps reduce node redundancy. Let’s see if there’s time to keep it updated regularly."
-version = "1.0.0"
+name = "ComfyUI-Minitools"
+description = "ComfyUI Mini Toolkit – Helps reduce node redundancy."
+version = "1.2.0"
 license = {file = "LICENSE"}
 
 [project.urls]
@@ -9,6 +9,6 @@ Repository = "https://github.com/lepiai/ComfyUI-Minitools"
 #  Used by Comfy Registry https://comfyregistry.org
 
 [tool.comfy]
-PublisherId = ""
+PublisherId = "gary"
 DisplayName = "ComfyUI-Minitools"
 Icon = ""
