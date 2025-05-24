@@ -1,7 +1,7 @@
 [project]
 name = "ComfyUI-Minitools"
 description = "ComfyUI Mini Toolkit – Helps reduce node redundancy."
-version = "1.2.0"
+version = "1.2.1"
 license = {file = "LICENSE"}
 
 [project.urls]
