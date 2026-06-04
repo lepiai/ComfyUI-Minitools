@@ -14,14 +14,15 @@ jobs:
   publish-node:
     name: Publish Custom Node to registry
     runs-on: ubuntu-latest
+    env:
+       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     if: ${{ github.repository_owner == 'lepiai' }}
     steps:
       - name: Check out code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           submodules: true
       - name: Publish Custom Node
         uses: Comfy-Org/publish-node-action@v1
         with:
-          ## Add your own personal access token to your Github Repository secrets and reference it here.
-          personal_access_token: ${{ secrets.REGISTRY_ACCESS_TOKEN }}
+           personal_access_token: ${{ secrets.REGISTRY_ACCESS_TOKEN }}
