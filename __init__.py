@@ -8,7 +8,7 @@ NODE_CLASS_MAPPINGS = {
     "LP-hex2dec"      : hex2dec.hex2dec,
     "LP-CropTransparentEdges":croptran.CropTransparentEdges,
     "LP-ImageToMaskWithAlpha":croptran.ImageToMaskWithAlpha,
-    "NumericSlider": croptran.NumericSlider
+    "NumericSlider": croptran.NumericSlider,
     "TaskSystemPromptSelector":prompt_for_bernini.TaskSystemPromptSelector
 }
  
@@ -19,6 +19,6 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "LP-hex2dec"      : "RGB or HEX Convert to DEC 👻",
     "LP-CropTransparentEdges": "Crop Transparent Edges 👻",
     "LP-ImageToMaskWithAlpha": "Image to Mask (With Alpha) 👻",
-    "NumericSlider": "Numeric Slider 👻"
+    "NumericSlider": "Numeric Slider 👻",
     "TaskSystemPromptSelector": "Task Selector for Bernini 👻"
 }
