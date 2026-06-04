@@ -23,3 +23,7 @@ git clone命令克隆本项目，即可完成所有节点的安装。
 
 6、NumericSlider数字滑块，包含浮点数和整数
 ![微信截图_20250522223929](https://github.com/user-attachments/assets/08de6738-945b-4c56-9747-cc829d047124)
+
+7、Task Selector for Bernini 适用于wan2.2 Bernini,根据任务选择预设提示词
+<img width="960" height="633" alt="image" src="https://github.com/user-attachments/assets/a7f5bd44-a44e-4867-8ed9-820125e12d65" />
+
