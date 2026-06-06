@@ -8,7 +8,8 @@ on:
       - "pyproject.toml"
 
 permissions:
-  issues: write
+  contents: read
+  packages: write
 
 jobs:
   publish-node:
@@ -25,4 +26,4 @@ jobs:
       - name: Publish Custom Node
         uses: Comfy-Org/publish-node-action@v1
         with:
-           personal_access_token: ${{ secrets.REGISTRY_ACCESS_TOKEN }}
+           registry_access_token: ${{ secrets.REGISTRY_ACCESS_TOKEN }}
