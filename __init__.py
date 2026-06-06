@@ -1,4 +1,4 @@
-from . import promptsTranslateEN, color2rgb,hex2dec,croptran,prompt_for_bernini
+from . import promptsTranslateEN, color2rgb,hex2dec,croptran,Bernini_Prompt_Enhance
 
 
 # 菜单名
