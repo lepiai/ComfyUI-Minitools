@@ -25,6 +25,7 @@ git clone命令克隆本项目，即可完成所有节点的安装。
 ![微信截图_20250522223929](https://github.com/user-attachments/assets/08de6738-945b-4c56-9747-cc829d047124)
 
 7、Task Selector for Bernini 适用于wan2.2 Bernini,根据任务选择预设提示词([官方演示](https://bernini-ai.github.io/#overview))
-<img width="1239" height="789" alt="image" src="https://github.com/user-attachments/assets/7aa1c7d5-0cb3-4e6b-81d0-8ee8050b36ac" />
+<img width="1884" height="975" alt="image" src="https://github.com/user-attachments/assets/74a021f7-34c6-4931-85ec-bde89738acd1" />
+
 
 
