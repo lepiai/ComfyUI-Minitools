@@ -9,7 +9,7 @@ NODE_CLASS_MAPPINGS = {
     "LP-CropTransparentEdges":croptran.CropTransparentEdges,
     "LP-ImageToMaskWithAlpha":croptran.ImageToMaskWithAlpha,
     "NumericSlider": croptran.NumericSlider,
-    "TaskSystemPromptSelector":prompt_for_bernini.TaskSystemPromptSelector
+    "BerniniPromptEnhancerBailian": Bernini_Prompt_Enhance.BerniniPromptEnhancerBailian
 }
  
 # 节点标题或描述
@@ -20,5 +20,5 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "LP-CropTransparentEdges": "Crop Transparent Edges 👻",
     "LP-ImageToMaskWithAlpha": "Image to Mask (With Alpha) 👻",
     "NumericSlider": "Numeric Slider 👻",
-    "TaskSystemPromptSelector": "Task Selector for Bernini 👻"
+    "BerniniPromptEnhancerBailian": "Bernini Prompt Enhance v1.2 👻"
 }
