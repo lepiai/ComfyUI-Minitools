@@ -1,7 +1,7 @@
 [project]
 name = "ComfyUI-Minitools"
 description = "ComfyUI Mini Toolkit – Helps reduce node redundancy."
-version = "1.2.6"
+version = "1.2.7"
 license = {file = "LICENSE"}
 
 [project.urls]
@@ -9,7 +9,7 @@ Repository = "https://github.com/lepiai/ComfyUI-Minitools"
 #  Used by Comfy Registry https://comfyregistry.org
 
 [tool.comfy]
-PublisherId = "lepiai"
+PublisherId = "gary"
 DisplayName = "ComfyUI-Minitools"
 Icon = ""
 SupportedComfyUIVersion = ">=0.2.0"
