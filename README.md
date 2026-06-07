@@ -31,6 +31,7 @@ git clone命令克隆本项目，即可完成所有节点的安装。
 多图反推：多图、视频反推，用于出视频、首尾帧视频、视频编辑
 
 反推内容会自动根据Bernini官方提示词预设模板完成补全和优化，也就是说不只是用于Bernini，可以完全独立出来作为一个提示词生成器来用。
+节点依赖阿里百炼大模型api，默认使用的是多模态模型，如果想节约token，可以分纯文本大模型和带有VL标识的视觉模型或多模态大模型，[点这里可注册阿里云百炼](https://www.aliyun.com/benefit/client/cross?userCode=8ue56lcb)后创建apikey，就可以免费获得不同模型100万token使用额度
 <img width="1674" height="1056" alt="image" src="https://github.com/user-attachments/assets/10a13d69-81df-437d-af6d-cfa7e74a57b3" />
 
 
