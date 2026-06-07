@@ -1,4 +1,4 @@
-from . import promptsTranslateEN, color2rgb,hex2dec,croptran,Bernini_Prompt_Enhance
+from . import promptsTranslateEN, color2rgb,hex2dec,croptran,PromptOptimizer
 
 
 # 菜单名
@@ -9,7 +9,7 @@ NODE_CLASS_MAPPINGS = {
     "LP-CropTransparentEdges":croptran.CropTransparentEdges,
     "LP-ImageToMaskWithAlpha":croptran.ImageToMaskWithAlpha,
     "NumericSlider": croptran.NumericSlider,
-    "BerniniPromptEnhancerBailian": Bernini_Prompt_Enhance.BerniniPromptEnhancerBailian
+    "BerniniPromptEnhancerBailian": PromptOptimizer.BerniniPromptEnhancerBailian
 }
  
 # 节点标题或描述
@@ -20,5 +20,5 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "LP-CropTransparentEdges": "Crop Transparent Edges 👻",
     "LP-ImageToMaskWithAlpha": "Image to Mask (With Alpha) 👻",
     "NumericSlider": "Numeric Slider 👻",
-    "BerniniPromptEnhancerBailian": "Bernini Prompt Enhance v1.2 👻"
+    "BerniniPromptEnhancerBailian": "Prompt Optimizer v1.2 👻"
 }
