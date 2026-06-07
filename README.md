@@ -24,14 +24,15 @@ git clone命令克隆本项目，即可完成所有节点的安装。
 6、NumericSlider数字滑块，包含浮点数和整数
 ![微信截图_20250522223929](https://github.com/user-attachments/assets/08de6738-945b-4c56-9747-cc829d047124)
 
-7、Task Selector for Bernini 适用于wan2.2 Bernini,根据任务选择预设提示词([官方演示](https://bernini-ai.github.io/#overview))
+7、PromptOptimizer 基于字节Bernini官方仓库中提示词增强优化而来,适用于提示词反推和优化、扩写([官方演示](https://bernini-ai.github.io/#overview))
 
 支持单图反推：可用于出图、出视频、首尾帧视频、视频编辑
 
 多图反推：多图、视频反推，用于出视频、首尾帧视频、视频编辑
 
 反推内容会自动根据Bernini官方提示词预设模板完成补全和优化，也就是说不只是用于Bernini，可以完全独立出来作为一个提示词生成器来用。
-<img width="1884" height="975" alt="image" src="https://github.com/user-attachments/assets/74a021f7-34c6-4931-85ec-bde89738acd1" />
+<img width="1674" height="1056" alt="image" src="https://github.com/user-attachments/assets/10a13d69-81df-437d-af6d-cfa7e74a57b3" />
+
 
 
 
