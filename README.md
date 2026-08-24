@@ -34,6 +34,8 @@ git clone命令克隆本项目，即可完成所有节点的安装。
 节点依赖阿里百炼大模型api，默认使用的是多模态模型，如果想节约token，可以分纯文本大模型和带有VL标识的视觉模型或多模态大模型，[点这里可注册阿里云百炼](https://www.aliyun.com/benefit/client/cross?userCode=8ue56lcb)后创建apikey，就可以免费获得不同模型100万token使用额度
 <img width="1674" height="1056" alt="image" src="https://github.com/user-attachments/assets/10a13d69-81df-437d-af6d-cfa7e74a57b3" />
 
-
+8、Minimax H3 Studio 海螺H3工作台
+利用这个节点只用一套工作流完成文生视频、图生视频（含首尾帧）、全能参考；支持所有兼容openai api协议的接口，包括但不限于本地ollama和阿里百炼api。
+<img width="858" height="756" alt="image" src="https://github.com/user-attachments/assets/a597e3fb-457d-4122-9958-eac93ff00f27" />
 
 
