@@ -36,6 +36,8 @@ git clone命令克隆本项目，即可完成所有节点的安装。
 
 8、Minimax H3 Studio 海螺H3工作台
 利用这个节点只用一套工作流完成文生视频、图生视频（含首尾帧）、全能参考；支持所有兼容openai api协议的接口，包括但不限于本地ollama和阿里百炼api。
+支持在提示词输入框中输入@调用上传的图片，支持点击图片自动填入图片名到提示词。
+在不适用llm接口的情况下，可以直接当作提示词编辑器离线使用，不走api来跑视频。
 <img width="858" height="756" alt="image" src="https://github.com/user-attachments/assets/a597e3fb-457d-4122-9958-eac93ff00f27" />
 
 
