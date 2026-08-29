@@ -1,0 +1,1593 @@
+{
+  "id": "a6ed1ab6-dbab-4457-bd39-fb67f772310d",
+  "revision": 0,
+  "last_node_id": 148,
+  "last_link_id": 304,
+  "nodes": [
+    {
+      "id": 32,
+      "type": "PathchSageAttentionKJ",
+      "pos": [
+        -1061.1318506908322,
+        5368.713842346962
+      ],
+      "size": [
+        270,
+        82
+      ],
+      "flags": {},
+      "order": 12,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 37
+        }
+      ],
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": [
+            199
+          ]
+        }
+      ],
+      "properties": {
+        "aux_id": "kijai/ComfyUI-KJNodes",
+        "ver": "9b565354e32a7061296ac598d9c7f445e10d31ed",
+        "Node name for S&R": "PathchSageAttentionKJ",
+        "cnr_id": "comfyui-kjnodes"
+      },
+      "widgets_values": [
+        "sageattn_qk_int8_pv_fp16_cuda",
+        false
+      ],
+      "widgets_values_named": {
+        "sage_attention": "sageattn_qk_int8_pv_fp16_cuda",
+        "allow_compile": false
+      }
+    },
+    {
+      "id": 95,
+      "type": "MiniMaxH3MemoryEfficientSageAttentionPatch",
+      "pos": [
+        -776.168642612591,
+        5376.944996585474
+      ],
+      "size": [
+        320.323828125,
+        26
+      ],
+      "flags": {},
+      "order": 15,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 199
+        }
+      ],
+      "outputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "links": [
+            203
+          ]
+        }
+      ],
+      "properties": {
+        "aux_id": "kijai/ComfyUI-KJNodes",
+        "ver": "60cd6bc1870db94c6eeb05fbe455147a8e91c4e9",
+        "Node name for S&R": "MiniMaxH3MemoryEfficientSageAttentionPatch",
+        "cnr_id": "comfyui-kjnodes"
+      }
+    },
+    {
+      "id": 13,
+      "type": "CLIPLoader",
+      "pos": [
+        -1564.8190706556034,
+        5502.627404534429
+      ],
+      "size": [
+        452.01809694668555,
+        107.83185039597629
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "CLIP",
+          "type": "CLIP",
+          "links": [
+            298
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.31.0",
+        "Node name for S&R": "CLIPLoader"
+      },
+      "widgets_values": [
+        "qwen3vl_32b_minimax_h3_int8_convrot.safetensors",
+        "minimax",
+        "default"
+      ],
+      "widgets_values_named": {
+        "clip_name": "qwen3vl_32b_minimax_h3_int8_convrot.safetensors",
+        "type": "minimax",
+        "device": "default"
+      },
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 11,
+      "type": "VAELoader",
+      "pos": [
+        -1572.0178260960836,
+        5679.953065073581
+      ],
+      "size": [
+        454.7718950430758,
+        58
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "VAE",
+          "type": "VAE",
+          "links": [
+            272,
+            297
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.31.0",
+        "Node name for S&R": "VAELoader"
+      },
+      "widgets_values": [
+        "minimax_h3_video_vae_fp16.safetensors"
+      ],
+      "widgets_values_named": {
+        "vae_name": "minimax_h3_video_vae_fp16.safetensors"
+      },
+      "color": "#322",
+      "bgcolor": "#533"
+    },
+    {
+      "id": 24,
+      "type": "VAELoader",
+      "pos": [
+        -1563.2136527463917,
+        5808.435291502327
+      ],
+      "size": [
+        450.85422220284886,
+        59.24904919681285
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "VAE",
+          "type": "VAE",
+          "links": [
+            274,
+            296
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.31.0",
+        "Node name for S&R": "VAELoader"
+      },
+      "widgets_values": [
+        "minimax_h3_audio_vae_fp32.safetensors"
+      ],
+      "widgets_values_named": {
+        "vae_name": "minimax_h3_audio_vae_fp32.safetensors"
+      },
+      "color": "#322",
+      "bgcolor": "#533"
+    },
+    {
+      "id": 78,
+      "type": "LoraLoaderModelOnly",
+      "pos": [
+        -434.1011669154106,
+        5373.465868241147
+      ],
+      "size": [
+        322.2567383467524,
+        82
+      ],
+      "flags": {},
+      "order": 17,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 203
+        }
+      ],
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": [
+            236
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.31.0",
+        "Node name for S&R": "LoraLoaderModelOnly"
+      },
+      "widgets_values": [
+        "minimax_h3_fl2v_lightx2v_turbo_4step_v0.1_comfy.safetensors",
+        0.75
+      ],
+      "widgets_values_named": {
+        "lora_name": "minimax_h3_fl2v_lightx2v_turbo_4step_v0.1_comfy.safetensors",
+        "strength_model": 0.75
+      }
+    },
+    {
+      "id": 127,
+      "type": "RandomNoise",
+      "pos": [
+        -63.95869734944612,
+        5451.953295323646
+      ],
+      "size": [
+        270,
+        82
+      ],
+      "flags": {
+        "collapsed": true
+      },
+      "order": 3,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "NOISE",
+          "type": "NOISE",
+          "links": [
+            266
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.31.0",
+        "Node name for S&R": "RandomNoise"
+      },
+      "widgets_values": [
+        44235097132028,
+        "randomize"
+      ],
+      "widgets_values_named": {
+        "noise_seed": 44235097132028,
+        "control_after_generate": "randomize"
+      }
+    },
+    {
+      "id": 126,
+      "type": "BasicGuider",
+      "pos": [
+        -61.25679740269452,
+        5355.754862729282
+      ],
+      "size": [
+        159.568359375,
+        46
+      ],
+      "flags": {},
+      "order": 20,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 284
+        },
+        {
+          "name": "conditioning",
+          "type": "CONDITIONING",
+          "link": 299
+        }
+      ],
+      "outputs": [
+        {
+          "name": "GUIDER",
+          "type": "GUIDER",
+          "links": [
+            267
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.31.0",
+        "Node name for S&R": "BasicGuider"
+      }
+    },
+    {
+      "id": 128,
+      "type": "BasicScheduler",
+      "pos": [
+        131.23724930542,
+        5340.981648969083
+      ],
+      "size": [
+        270,
+        106
+      ],
+      "flags": {},
+      "order": 21,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 285
+        }
+      ],
+      "outputs": [
+        {
+          "name": "SIGMAS",
+          "type": "SIGMAS",
+          "links": [
+            269
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.31.0",
+        "Node name for S&R": "BasicScheduler"
+      },
+      "widgets_values": [
+        "simple",
+        4,
+        1
+      ],
+      "widgets_values_named": {
+        "scheduler": "simple",
+        "steps": 4,
+        "denoise": 1
+      }
+    },
+    {
+      "id": 130,
+      "type": "KSamplerSelect",
+      "pos": [
+        102.29999822730312,
+        5231.1733625877805
+      ],
+      "size": [
+        270,
+        58
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "SAMPLER",
+          "type": "SAMPLER",
+          "links": [
+            268
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.31.0",
+        "Node name for S&R": "KSamplerSelect"
+      },
+      "widgets_values": [
+        "sa_solver"
+      ],
+      "widgets_values_named": {
+        "sampler_name": "sa_solver"
+      }
+    },
+    {
+      "id": 131,
+      "type": "VAEDecode",
+      "pos": [
+        841.4151651282166,
+        5254.673452910812
+      ],
+      "size": [
+        140,
+        46
+      ],
+      "flags": {
+        "collapsed": false
+      },
+      "order": 23,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "samples",
+          "type": "LATENT",
+          "link": 271
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": 272
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            277
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.31.0",
+        "Node name for S&R": "VAEDecode"
+      },
+      "color": "#322",
+      "bgcolor": "#533"
+    },
+    {
+      "id": 132,
+      "type": "VAEDecodeAudio",
+      "pos": [
+        846.9564337568445,
+        5339.270353764826
+      ],
+      "size": [
+        150.6763671875,
+        46
+      ],
+      "flags": {
+        "collapsed": false
+      },
+      "order": 24,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "samples",
+          "type": "LATENT",
+          "link": 273
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": 274
+        }
+      ],
+      "outputs": [
+        {
+          "name": "AUDIO",
+          "type": "AUDIO",
+          "links": [
+            278
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.31.0",
+        "Node name for S&R": "VAEDecodeAudio"
+      },
+      "color": "#322",
+      "bgcolor": "#533"
+    },
+    {
+      "id": 117,
+      "type": "ResolutionSelector",
+      "pos": [
+        -1537.2427642719597,
+        6068.92381325921
+      ],
+      "size": [
+        270,
+        126
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "width",
+          "type": "INT",
+          "links": [
+            293
+          ]
+        },
+        {
+          "name": "height",
+          "type": "INT",
+          "links": [
+            292
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.31.1",
+        "Node name for S&R": "ResolutionSelector"
+      },
+      "widgets_values": [
+        "16:9 (Widescreen)",
+        0.7,
+        32
+      ],
+      "widgets_values_named": {
+        "aspect_ratio": "16:9 (Widescreen)",
+        "megapixels": 0.7,
+        "multiple": 32
+      }
+    },
+    {
+      "id": 136,
+      "type": "PreviewAny",
+      "pos": [
+        -812.0785913937696,
+        5718.350935039474
+      ],
+      "size": [
+        210,
+        122
+      ],
+      "flags": {
+        "collapsed": true
+      },
+      "order": 14,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "source",
+          "type": "*",
+          "link": 304
+        }
+      ],
+      "outputs": [
+        {
+          "name": "STRING",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.33.3",
+        "Node name for S&R": "PreviewAny"
+      },
+      "widgets_values": [],
+      "widgets_values_named": {}
+    },
+    {
+      "id": 111,
+      "type": "ComfyMathExpression",
+      "pos": [
+        -947.2121135496092,
+        5717.7298696796715
+      ],
+      "size": [
+        225,
+        128
+      ],
+      "flags": {
+        "collapsed": true
+      },
+      "order": 11,
+      "mode": 0,
+      "inputs": [
+        {
+          "label": "values.a",
+          "name": "values.a",
+          "type": "FLOAT,INT,BOOLEAN",
+          "link": 230
+        },
+        {
+          "label": "b",
+          "name": "values.b",
+          "shape": 7,
+          "type": "FLOAT,INT,BOOLEAN",
+          "link": null
+        },
+        {
+          "label": "expression",
+          "name": "expression",
+          "type": "STRING",
+          "widget": {
+            "name": "expression"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "label": "FLOAT",
+          "name": "FLOAT",
+          "type": "FLOAT",
+          "links": [
+            304
+          ]
+        },
+        {
+          "label": "INT",
+          "name": "INT",
+          "type": "INT",
+          "links": [
+            286
+          ]
+        },
+        {
+          "label": "BOOL",
+          "name": "BOOL",
+          "type": "BOOLEAN",
+          "links": []
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.30.0",
+        "Node name for S&R": "ComfyMathExpression",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {},
+          "version": "7.8"
+        },
+        "widget_ue_connectable": {
+          "expression": true
+        }
+      },
+      "widgets_values": [
+        "max(5, round(a * 24)) + (5 - (max(5, round(a * 24)) % 17)) % 17"
+      ],
+      "widgets_values_named": {
+        "expression": "max(5, round(a * 24)) + (5 - (max(5, round(a * 24)) % 17)) % 17"
+      }
+    },
+    {
+      "id": 113,
+      "type": "SolAttnPatch",
+      "pos": [
+        -407.40065103972563,
+        4982.576610615775
+      ],
+      "size": [
+        270,
+        342
+      ],
+      "flags": {},
+      "order": 18,
+      "mode": 4,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 236
+        },
+        {
+          "name": "tau_profile",
+          "shape": 7,
+          "type": "STRING",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": [
+            283
+          ]
+        }
+      ],
+      "properties": {
+        "aux_id": "kijai/ComfyUI-SolAttn_triton",
+        "ver": "1b8deced8297c51077d5625a5108e6f3f3d67093",
+        "Node name for S&R": "SolAttnPatch"
+      },
+      "widgets_values": [
+        1.3,
+        0.2,
+        1,
+        4096,
+        true,
+        "exact_kv_and_rows",
+        false,
+        "2d_frame",
+        true,
+        false,
+        false,
+        ""
+      ],
+      "widgets_values_named": {
+        "tau": 1.3,
+        "start_percent": 0.2,
+        "end_percent": 1,
+        "min_tokens": 4096,
+        "int8_qk": true,
+        "sink_conditioning": "exact_kv_and_rows",
+        "morton": false,
+        "morton_curve": "2d_frame",
+        "int8_pv": true,
+        "verbose": false,
+        "use_tma": false,
+        "dense_blocks": ""
+      }
+    },
+    {
+      "id": 137,
+      "type": "ModelPreviewOverrideKJ",
+      "pos": [
+        -152.61691600194482,
+        5528.003060316514
+      ],
+      "size": [
+        501.70680441652235,
+        510.71980409148455
+      ],
+      "flags": {},
+      "order": 19,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 283
+        },
+        {
+          "name": "vae",
+          "shape": 7,
+          "type": "VAE",
+          "link": null
+        },
+        {
+          "name": "preview_frames",
+          "type": "INT",
+          "widget": {
+            "name": "preview_frames"
+          },
+          "link": 286
+        }
+      ],
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": [
+            284,
+            285
+          ]
+        }
+      ],
+      "properties": {
+        "aux_id": "kijai/ComfyUI-KJNodes",
+        "ver": "60cd6bc1870db94c6eeb05fbe455147a8e91c4e9",
+        "Node name for S&R": "ModelPreviewOverrideKJ"
+      },
+      "widgets_values": [
+        1024,
+        80,
+        true,
+        1,
+        12,
+        "none",
+        ""
+      ],
+      "widgets_values_named": {
+        "max_resolution": 1024,
+        "jpeg_quality": 80,
+        "suppress_default_preview": true,
+        "preview_frames": 1,
+        "preview_fps": 12,
+        "tiny_vae": "none",
+        "preview": ""
+      }
+    },
+    {
+      "id": 129,
+      "type": "SamplerCustomAdvanced",
+      "pos": [
+        461.69192134234993,
+        5251.85759144954
+      ],
+      "size": [
+        360.8153569108632,
+        322.7516325204933
+      ],
+      "flags": {},
+      "order": 22,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "noise",
+          "type": "NOISE",
+          "link": 266
+        },
+        {
+          "name": "guider",
+          "type": "GUIDER",
+          "link": 267
+        },
+        {
+          "name": "sampler",
+          "type": "SAMPLER",
+          "link": 268
+        },
+        {
+          "name": "sigmas",
+          "type": "SIGMAS",
+          "link": 269
+        },
+        {
+          "name": "latent_image",
+          "type": "LATENT",
+          "link": 300
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "LATENT",
+          "links": [
+            271,
+            273
+          ]
+        },
+        {
+          "name": "denoised_output",
+          "type": "LATENT",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.31.0",
+        "Node name for S&R": "SamplerCustomAdvanced"
+      }
+    },
+    {
+      "id": 133,
+      "type": "VHS_VideoCombine",
+      "pos": [
+        379.2262931237351,
+        5641.999034377963
+      ],
+      "size": [
+        368.2238284814532,
+        565.4576824896963
+      ],
+      "flags": {},
+      "order": 25,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 277
+        },
+        {
+          "name": "audio",
+          "shape": 7,
+          "type": "AUDIO",
+          "link": 278
+        },
+        {
+          "name": "meta_batch",
+          "shape": 7,
+          "type": "VHS_BatchManager",
+          "link": null
+        },
+        {
+          "name": "vae",
+          "shape": 7,
+          "type": "VAE",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "Filenames",
+          "type": "VHS_FILENAMES",
+          "links": null
+        }
+      ],
+      "properties": {
+        "aux_id": "Kosinkadink/ComfyUI-VideoHelperSuite",
+        "ver": "4ee72c065db22c9d96c2427954dc69e7b908444b",
+        "Node name for S&R": "VHS_VideoCombine"
+      },
+      "widgets_values": {
+        "frame_rate": 24,
+        "loop_count": 0,
+        "filename_prefix": "minimaxH3",
+        "format": "video/h264-mp4",
+        "pix_fmt": "yuv420p",
+        "crf": 19,
+        "save_metadata": true,
+        "trim_to_audio": false,
+        "pingpong": false,
+        "save_output": true,
+        "save_png": true,
+        "videopreview": {
+          "hidden": false,
+          "paused": false,
+          "params": {
+            "filename": "minimaxH3_00022-audio.mp4",
+            "subfolder": "",
+            "type": "output",
+            "format": "video/h264-mp4",
+            "frame_rate": 24,
+            "workflow": "minimaxH3_00022_last.png",
+            "fullpath": "/root/ComfyUI/output/minimaxH3_00022_last.png"
+          }
+        }
+      },
+      "widgets_values_named": {
+        "frame_rate": 24,
+        "loop_count": 0,
+        "filename_prefix": "minimaxH3",
+        "format": "video/h264-mp4",
+        "pix_fmt": "yuv420p",
+        "crf": 19,
+        "save_metadata": true,
+        "trim_to_audio": false,
+        "pingpong": false,
+        "save_output": true,
+        "save_png": true,
+        "videopreview": {
+          "hidden": false,
+          "paused": false,
+          "params": {
+            "filename": "minimaxH3_00022-audio.mp4",
+            "subfolder": "",
+            "type": "output",
+            "format": "video/h264-mp4",
+            "frame_rate": 24,
+            "workflow": "minimaxH3_00022_last.png",
+            "fullpath": "/root/ComfyUI/output/minimaxH3_00022_last.png"
+          }
+        }
+      }
+    },
+    {
+      "id": 134,
+      "type": "ShowText|pysssss",
+      "pos": [
+        -1061.3493402319639,
+        6302.537701740136
+      ],
+      "size": [
+        879.4431526742246,
+        359.980188067957
+      ],
+      "flags": {},
+      "order": 16,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "text",
+          "type": "STRING",
+          "link": 301
+        }
+      ],
+      "outputs": [
+        {
+          "name": "STRING",
+          "shape": 6,
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "aux_id": "pythongosssss/ComfyUI-Custom-Scripts",
+        "ver": "609f3afaa74b2f88ef9ce8d939626065e3247469",
+        "Node name for S&R": "ShowText|pysssss"
+      },
+      "widgets_values": [
+        "subject_definitions:\n<Subject 1> is the abstract pink kinetic-typography style in <Picture 1>, with dense Japanese magazine-style layouts, neon pink/rose gradients, glowing vector lines, and high-energy motion graphics.\n<Picture 1> is the style reference for the entire video, defining the pink color palette, typography treatment, and graphic density.\n\nsummary:\n[reference generation] The target video is a 10-second high-energy kinetic typography promo for \"Minimax H3 Studio\", styled after <Picture 1> with pink-dominated Japanese editorial design. It opens with four pain-point questions in rapid-fire animated text, each word splitting, rotating, stretching, and exploding before reforming, then transitions to the product name and three feature lines with synchronized graphic elements, ending on a held title card with the tagline. The entire piece uses <Picture 1> as its visual style anchor.\n\nretention_analysis:\n<Subject 1> (appears in [Shot 1], [Shot 2], [Shot 3], [Shot 4], [Shot 5], [Shot 6], [Shot 7], [Shot 8]): fully_preserved - the pink color system, dense layered typography, glowing accents, and Japanese asymmetric composition are maintained throughout.\n<Picture 1>: fully_preserved - serves as the sole style reference for palette, typography treatment, graphic elements, and compositional density across all shots.\n\ndetailed_description:\nHigh-energy kinetic typography promo in the style of <Picture 1>: neon pink, rose gold, and magenta gradients on deep blue-black backgrounds, dense Japanese magazine-style layouts with diagonal asymmetry, glowing vector lines, halftone textures, and HUD-style graphic overlays. Every text element is treated as graphic design, not subtitles.\n\n[Shot 1] The screen is black. At 00:00.000, a single pink speed line slashes diagonally across the frame with a bass impact, followed by a white flash frame. The camera snap-zooms in with large amplitude at fast speed as the first question \"原生Minimax节点太鸡肋？\" assembles character by character — each character splits into strokes, rotates 90 degrees, stretches vertically, and slams into place with a pink glow. A pink crosshair HUD pulses in the upper right. Rose gold halftone dots scatter across the lower third. The camera handheld-shakes with small amplitude at fast speed.\n\n[Shot 2] At 00:01.200, the camera cuts to a diagonal composition. The second question \"三套工作流来回切换？\" enters from the left with a whip-pan motion, each character exploding outward into petal particles and reforming. A single-frame RGB split (magenta + cyan offset) flashes on the beat. The camera trucks right with large amplitude at fast speed, then急停 zooms in on the final character. Scan lines sweep across the screen.\n\n[Shot 3] At 00:02.400, the camera cuts to a tight close-up of the third question \"素材太多，提示词需要反复核对？\". The text is layered in a dense collage — some characters semi-transparent, others with soft focus glow. Each word collides with its neighbor, compresses, then rebounds with elastic overshoot. Pink grid lines rotate slowly in the background. The camera arcs with small amplitude at medium speed, creating parallax depth between text layers.\n\n[Shot 4] At 00:03.600, the camera cuts to a wide shot with the fourth question \"提示词规范手搓太麻烦没创意？\" arranged in a sweeping diagonal from lower left to upper right. The characters stretch horizontally, then snap back with a glitch frame. Sparkle stardust particles drift across the screen. The camera pushes in with large amplitude at fast speed, then tilts Dutch angle 15 degrees.\n\n[Shot 5] At 00:04.800, the camera cuts to a black screen with a single white flash frame. The product name \"Minimax H3 studio\" assembles from scattered geometric fragments — each letter rotates, scales up with overshoot, and locks into place with a bass hit. The text is massive, centered, with a neon pink glow and rose gold outline. The camera snap-zooms out with large amplitude at fast speed, revealing a dense layered composition with rounded rectangles, glowing vector lines, and floating geometric decorations.\n\n[Shot 6] At 00:06.000, the camera cuts to a three-tier layout. The first feature line \"支持可视化素材管理\" slides in from the left on a pink rounded rectangle, characters staggering in with elastic easing. The camera pans left with small amplitude at fast speed. A pink speed line accents the entry.\n\n[Shot 7] At 00:06.800, the camera cuts to the second feature line \"提示词自动填充素材\" entering from the right with a whip-pan, characters colliding and compressing before settling. The camera trucks right with small amplitude at fast speed. A glitch frame flashes.\n\n[Shot 8] At 00:07.600, the camera cuts to the third feature line \"创意加工+格式化输出\" assembling from below with a pedestal up motion, characters stretching vertically then snapping into place. The camera pushes in with small amplitude at fast speed. All three feature lines now occupy the screen in a dense asymmetric layout.\n\n[Shot 9] At 00:08.400, the camera cuts to the final title card. \"Minimax H3 Studio\" dominates the upper half in massive glowing pink letters, with \"可视化素材管理，视频创作的正确打开方式\" below in smaller rose gold text. The background is a deep blue-black with subtle grid lines, floating petal particles, and soft pink glow. The camera slowly pushes in with small amplitude at slow speed. The composition holds stable through the final second with subtle particle drift and glow pulsing.\n\noverall_soundscape:\nThe soundscape is dominated by deep bass impacts synchronized with each text assembly and camera cut, accompanied by digital glitch crackles, text-shatter effects, and whoosh sounds for whip-pan transitions. Each of the four questions lands with a distinct bass hit, followed by a brief silence before the next impact. The final title card is underscored by a sustained low synth pad with subtle sparkle SFX.\n\nnon_diegetic_music:\nElectronic-core BGM at 150 BPM with heavy sub-bass, glitchy percussion, and bright synth stabs. The track builds intensity through the four question beats, hits a brief drop at the product name reveal, then drives to a climax with layered bass impacts before resolving into a sustained final chord under the title card."
+      ],
+      "widgets_values_named": {
+        "text_0": "subject_definitions:\n<Subject 1> is the abstract pink kinetic-typography style in <Picture 1>, with dense Japanese magazine-style layouts, neon pink/rose gradients, glowing vector lines, and high-energy motion graphics.\n<Picture 1> is the style reference for the entire video, defining the pink color palette, typography treatment, and graphic density.\n\nsummary:\n[reference generation] The target video is a 10-second high-energy kinetic typography promo for \"Minimax H3 Studio\", styled after <Picture 1> with pink-dominated Japanese editorial design. It opens with four pain-point questions in rapid-fire animated text, each word splitting, rotating, stretching, and exploding before reforming, then transitions to the product name and three feature lines with synchronized graphic elements, ending on a held title card with the tagline. The entire piece uses <Picture 1> as its visual style anchor.\n\nretention_analysis:\n<Subject 1> (appears in [Shot 1], [Shot 2], [Shot 3], [Shot 4], [Shot 5], [Shot 6], [Shot 7], [Shot 8]): fully_preserved - the pink color system, dense layered typography, glowing accents, and Japanese asymmetric composition are maintained throughout.\n<Picture 1>: fully_preserved - serves as the sole style reference for palette, typography treatment, graphic elements, and compositional density across all shots.\n\ndetailed_description:\nHigh-energy kinetic typography promo in the style of <Picture 1>: neon pink, rose gold, and magenta gradients on deep blue-black backgrounds, dense Japanese magazine-style layouts with diagonal asymmetry, glowing vector lines, halftone textures, and HUD-style graphic overlays. Every text element is treated as graphic design, not subtitles.\n\n[Shot 1] The screen is black. At 00:00.000, a single pink speed line slashes diagonally across the frame with a bass impact, followed by a white flash frame. The camera snap-zooms in with large amplitude at fast speed as the first question \"原生Minimax节点太鸡肋？\" assembles character by character — each character splits into strokes, rotates 90 degrees, stretches vertically, and slams into place with a pink glow. A pink crosshair HUD pulses in the upper right. Rose gold halftone dots scatter across the lower third. The camera handheld-shakes with small amplitude at fast speed.\n\n[Shot 2] At 00:01.200, the camera cuts to a diagonal composition. The second question \"三套工作流来回切换？\" enters from the left with a whip-pan motion, each character exploding outward into petal particles and reforming. A single-frame RGB split (magenta + cyan offset) flashes on the beat. The camera trucks right with large amplitude at fast speed, then急停 zooms in on the final character. Scan lines sweep across the screen.\n\n[Shot 3] At 00:02.400, the camera cuts to a tight close-up of the third question \"素材太多，提示词需要反复核对？\". The text is layered in a dense collage — some characters semi-transparent, others with soft focus glow. Each word collides with its neighbor, compresses, then rebounds with elastic overshoot. Pink grid lines rotate slowly in the background. The camera arcs with small amplitude at medium speed, creating parallax depth between text layers.\n\n[Shot 4] At 00:03.600, the camera cuts to a wide shot with the fourth question \"提示词规范手搓太麻烦没创意？\" arranged in a sweeping diagonal from lower left to upper right. The characters stretch horizontally, then snap back with a glitch frame. Sparkle stardust particles drift across the screen. The camera pushes in with large amplitude at fast speed, then tilts Dutch angle 15 degrees.\n\n[Shot 5] At 00:04.800, the camera cuts to a black screen with a single white flash frame. The product name \"Minimax H3 studio\" assembles from scattered geometric fragments — each letter rotates, scales up with overshoot, and locks into place with a bass hit. The text is massive, centered, with a neon pink glow and rose gold outline. The camera snap-zooms out with large amplitude at fast speed, revealing a dense layered composition with rounded rectangles, glowing vector lines, and floating geometric decorations.\n\n[Shot 6] At 00:06.000, the camera cuts to a three-tier layout. The first feature line \"支持可视化素材管理\" slides in from the left on a pink rounded rectangle, characters staggering in with elastic easing. The camera pans left with small amplitude at fast speed. A pink speed line accents the entry.\n\n[Shot 7] At 00:06.800, the camera cuts to the second feature line \"提示词自动填充素材\" entering from the right with a whip-pan, characters colliding and compressing before settling. The camera trucks right with small amplitude at fast speed. A glitch frame flashes.\n\n[Shot 8] At 00:07.600, the camera cuts to the third feature line \"创意加工+格式化输出\" assembling from below with a pedestal up motion, characters stretching vertically then snapping into place. The camera pushes in with small amplitude at fast speed. All three feature lines now occupy the screen in a dense asymmetric layout.\n\n[Shot 9] At 00:08.400, the camera cuts to the final title card. \"Minimax H3 Studio\" dominates the upper half in massive glowing pink letters, with \"可视化素材管理，视频创作的正确打开方式\" below in smaller rose gold text. The background is a deep blue-black with subtle grid lines, floating petal particles, and soft pink glow. The camera slowly pushes in with small amplitude at slow speed. The composition holds stable through the final second with subtle particle drift and glow pulsing.\n\noverall_soundscape:\nThe soundscape is dominated by deep bass impacts synchronized with each text assembly and camera cut, accompanied by digital glitch crackles, text-shatter effects, and whoosh sounds for whip-pan transitions. Each of the four questions lands with a distinct bass hit, followed by a brief silence before the next impact. The final title card is underscored by a sustained low synth pad with subtle sparkle SFX.\n\nnon_diegetic_music:\nElectronic-core BGM at 150 BPM with heavy sub-bass, glitchy percussion, and bright synth stabs. The track builds intensity through the four question beats, hits a brief drop at the product name reveal, then drives to a climax with layered bass impacts before resolving into a sustained final chord under the title card."
+      }
+    },
+    {
+      "id": 110,
+      "type": "PrimitiveFloat",
+      "pos": [
+        -1525.8946248875782,
+        5939.996559513547
+      ],
+      "size": [
+        270,
+        70
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [
+        {
+          "label": "value",
+          "name": "value",
+          "type": "FLOAT",
+          "widget": {
+            "name": "value"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "label": "FLOAT",
+          "name": "FLOAT",
+          "type": "FLOAT",
+          "links": [
+            230,
+            294
+          ]
+        }
+      ],
+      "title": "Float (Duration)",
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.15.1",
+        "Node name for S&R": "PrimitiveFloat",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {},
+          "version": "7.8"
+        },
+        "widget_ue_connectable": {
+          "value": true
+        }
+      },
+      "widgets_values": [
+        10
+      ],
+      "widgets_values_named": {
+        "value": 10
+      },
+      "color": "#322",
+      "bgcolor": "#533"
+    },
+    {
+      "id": 6,
+      "type": "UNETLoader",
+      "pos": [
+        -1569.4377318461197,
+        5367.0610936337
+      ],
+      "size": [
+        452.26797818302316,
+        82
+      ],
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": [
+            37
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.31.0",
+        "Node name for S&R": "UNETLoader"
+      },
+      "widgets_values": [
+        "minimax_h3_ref2va_pruned_int8_convrot.safetensors",
+        "default"
+      ],
+      "widgets_values_named": {
+        "unet_name": "minimax_h3_ref2va_pruned_int8_convrot.safetensors",
+        "weight_dtype": "default"
+      },
+      "color": "#223",
+      "bgcolor": "#335"
+    },
+    {
+      "id": 147,
+      "type": "MarkdownNote",
+      "pos": [
+        -2061.3061335336856,
+        5377.593606858814
+      ],
+      "size": [
+        440,
+        740
+      ],
+      "flags": {},
+      "order": 8,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "title": "Note: Model Links",
+      "properties": {},
+      "widgets_values": [
+        "## Model Links\n[🤗 Comfy-Org/MiniMax-H3](https://huggingface.co/Comfy-Org/MiniMax-H3)\n\n**vae**\n\n- [minimax_h3_video_vae_fp16.safetensors](https://huggingface.co/Comfy-Org/MiniMax-H3/resolve/main/vae/minimax_h3_video_vae_fp16.safetensors)\n- [minimax_h3_audio_vae_fp32.safetensors](https://huggingface.co/Comfy-Org/MiniMax-H3/resolve/main/vae/minimax_h3_audio_vae_fp32.safetensors)\n\n**diffusion_models**\n\n- [minimax_h3_ref2va_pruned_int8_convrot.safetensors](https://huggingface.co/Comfy-Org/MiniMax-H3/resolve/main/diffusion_models/minimax_h3_ref2va_pruned_int8_convrot.safetensors)\n\n**text_encoders**\n\n- [qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors](https://huggingface.co/Comfy-Org/MiniMax-H3/resolve/main/text_encoders/qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors)\n\n**loras**\n\n- 4 steps: [minimax_h3_ref2v_turbo_4step_v0.1_comfyui_bf16.safetensors](https://huggingface.co/Comfy-Org/MiniMax-H3/resolve/main/loras/minimax_h3_ref2v_turbo_4step_v0.1_comfyui_bf16.safetensors)\n\n## Model Storage Location\n\n```\n📂 ComfyUI/\n├── 📂 models/\n│   ├── 📂 vae/\n│   │   ├── minimax_h3_video_vae_fp16.safetensors\n│   │   └── minimax_h3_audio_vae_fp32.safetensors\n│   ├── 📂 diffusion_models/\n│   │   └── minimax_h3_ref2va_pruned_int8_convrot.safetensors\n│   ├── 📂 text_encoders/\n│   │   └── qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors\n│   └── 📂 loras/\n│       └── minimax_h3_ref2v_turbo_4step_v0.1_comfyui_bf16.safetensors\n```\n\n## Report Issue\n\nNote: Please update ComfyUI first ([guide](https://docs.comfy.org/installation/update_comfyui)) and prepare required models. Desktop/Cloud updates follow stable releases, so some nightly-supported models may not be available yet.\n\n- Cannot run / runtime errors: [ComfyUI/issues](https://github.com/comfyanonymous/ComfyUI/issues)\n- UI / frontend issues: [ComfyUI_frontend/issues](https://github.com/Comfy-Org/ComfyUI_frontend/issues)\n- Workflow issues: [workflow_templates/issues](https://github.com/Comfy-Org/workflow_templates/issues)\n"
+      ],
+      "widgets_values_named": {
+        "text": "## Model Links\n[🤗 Comfy-Org/MiniMax-H3](https://huggingface.co/Comfy-Org/MiniMax-H3)\n\n**vae**\n\n- [minimax_h3_video_vae_fp16.safetensors](https://huggingface.co/Comfy-Org/MiniMax-H3/resolve/main/vae/minimax_h3_video_vae_fp16.safetensors)\n- [minimax_h3_audio_vae_fp32.safetensors](https://huggingface.co/Comfy-Org/MiniMax-H3/resolve/main/vae/minimax_h3_audio_vae_fp32.safetensors)\n\n**diffusion_models**\n\n- [minimax_h3_ref2va_pruned_int8_convrot.safetensors](https://huggingface.co/Comfy-Org/MiniMax-H3/resolve/main/diffusion_models/minimax_h3_ref2va_pruned_int8_convrot.safetensors)\n\n**text_encoders**\n\n- [qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors](https://huggingface.co/Comfy-Org/MiniMax-H3/resolve/main/text_encoders/qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors)\n\n**loras**\n\n- 4 steps: [minimax_h3_ref2v_turbo_4step_v0.1_comfyui_bf16.safetensors](https://huggingface.co/Comfy-Org/MiniMax-H3/resolve/main/loras/minimax_h3_ref2v_turbo_4step_v0.1_comfyui_bf16.safetensors)\n\n## Model Storage Location\n\n```\n📂 ComfyUI/\n├── 📂 models/\n│   ├── 📂 vae/\n│   │   ├── minimax_h3_video_vae_fp16.safetensors\n│   │   └── minimax_h3_audio_vae_fp32.safetensors\n│   ├── 📂 diffusion_models/\n│   │   └── minimax_h3_ref2va_pruned_int8_convrot.safetensors\n│   ├── 📂 text_encoders/\n│   │   └── qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors\n│   └── 📂 loras/\n│       └── minimax_h3_ref2v_turbo_4step_v0.1_comfyui_bf16.safetensors\n```\n\n## Report Issue\n\nNote: Please update ComfyUI first ([guide](https://docs.comfy.org/installation/update_comfyui)) and prepare required models. Desktop/Cloud updates follow stable releases, so some nightly-supported models may not be available yet.\n\n- Cannot run / runtime errors: [ComfyUI/issues](https://github.com/comfyanonymous/ComfyUI/issues)\n- UI / frontend issues: [ComfyUI_frontend/issues](https://github.com/Comfy-Org/ComfyUI_frontend/issues)\n- Workflow issues: [workflow_templates/issues](https://github.com/Comfy-Org/workflow_templates/issues)\n"
+      },
+      "color": "#222",
+      "bgcolor": "#000"
+    },
+    {
+      "id": 143,
+      "type": "LP-MiniMaxH3Studio",
+      "pos": [
+        -1058.9601171900972,
+        5523.860847470027
+      ],
+      "size": [
+        880,
+        705
+      ],
+      "flags": {},
+      "order": 13,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 298
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": 297
+        },
+        {
+          "name": "audio_vae",
+          "shape": 7,
+          "type": "VAE",
+          "link": 296
+        },
+        {
+          "name": "llm_config",
+          "shape": 7,
+          "type": "H3_LLM_CONFIG",
+          "link": 295
+        },
+        {
+          "name": "duration",
+          "type": "FLOAT",
+          "widget": {
+            "name": "duration"
+          },
+          "link": 294
+        },
+        {
+          "name": "width",
+          "type": "INT",
+          "widget": {
+            "name": "width"
+          },
+          "link": 293
+        },
+        {
+          "name": "height",
+          "type": "INT",
+          "widget": {
+            "name": "height"
+          },
+          "link": 292
+        }
+      ],
+      "outputs": [
+        {
+          "name": "positive",
+          "type": "CONDITIONING",
+          "links": [
+            299
+          ]
+        },
+        {
+          "name": "latent",
+          "type": "LATENT",
+          "links": [
+            300
+          ]
+        },
+        {
+          "name": "prompt",
+          "type": "STRING",
+          "links": [
+            301
+          ]
+        }
+      ],
+      "properties": {
+        "aux_id": "lepiai/comfyui-minitools",
+        "ver": "c4bbbe69a171f8fc97201a0261ff43f4eb0c4bea",
+        "Node name for S&R": "LP-MiniMaxH3Studio"
+      },
+      "widgets_values": [
+        "{\"images\":[{\"filename\":\"ComfyUI_0002.png\",\"subfolder\":\"\"}],\"audios\":[],\"videos\":[],\"prompt\":\"逐字独立动画，拆分笔画，每字分裂/旋转/拉伸/挤压/碰撞/爆炸后重组，精准卡点\\n“原生Minimax节点太鸡肋？”\\n“三套工作流来回切换？”\\n“素材太多，提示词需要反复核对？“\\n”提示词规范手搓太麻烦没创意？”\\n\\n\\\"Minimax H3 studio“\\n\\\"支持可视化素材管理”\\n\\\"提示词自动填充素材“\\n”创意加工+格式化输出\\\"\\n\\n镜头运动（持续）：超快摇镜、急停变焦、推拉、手持微震、冲击震颤、透视摆动、对角线运动、视差纵深，转场依音乐动量，弹性缓动/过冲/惯性/加速\\n色彩与排版：蓝色系（亮粉/霓虹粉/淡粉/玫瑰粉/紫粉渐变）。排版为图形设计，非字幕——密集杂志布局、日式不对称平衡、对角线、分层拼贴，全元素粉调+发光辉光/柔焦/半透明层\\n图形元素（同步音乐）：粉色速度线、玫瑰金半调、粉色准心HUD、发光矢量线、圆角框、扫描线、网格、几何装饰、花瓣粒子、闪光星尘、墨迹、噪点\\n单帧闪烁（每主节拍）：粉闪/白闪/故障帧/RGB分裂（洋红+青偏移）、色差、跳帧、频闪、文字交换、一帧扭曲\\n风格：高度响应，每帧有目的运动，紧凑构图，强视觉层次，完美节奏，电影级动态模糊，高端合成。日系原宿甜美+实验动画锐利，媲美顶尖MV文字设计\\n最后定格标题文字“Minimax H3 Studio”和“可视化素材管理，视频创作的正确打开方式”，\",\"roles\":\"\"}",
+        "Ref2VA - 全能参考模式",
+        "专业PV预告片 Pro PV/Trailer",
+        5,
+        1344,
+        768,
+        "English",
+        "match",
+        ""
+      ],
+      "widgets_values_named": {
+        "h3_materials": "{\"images\":[{\"filename\":\"ComfyUI_0002.png\",\"subfolder\":\"\"}],\"audios\":[],\"videos\":[],\"prompt\":\"逐字独立动画，拆分笔画，每字分裂/旋转/拉伸/挤压/碰撞/爆炸后重组，精准卡点\\n“原生Minimax节点太鸡肋？”\\n“三套工作流来回切换？”\\n“素材太多，提示词需要反复核对？“\\n”提示词规范手搓太麻烦没创意？”\\n\\n\\\"Minimax H3 studio“\\n\\\"支持可视化素材管理”\\n\\\"提示词自动填充素材“\\n”创意加工+格式化输出\\\"\\n\\n镜头运动（持续）：超快摇镜、急停变焦、推拉、手持微震、冲击震颤、透视摆动、对角线运动、视差纵深，转场依音乐动量，弹性缓动/过冲/惯性/加速\\n色彩与排版：蓝色系（亮粉/霓虹粉/淡粉/玫瑰粉/紫粉渐变）。排版为图形设计，非字幕——密集杂志布局、日式不对称平衡、对角线、分层拼贴，全元素粉调+发光辉光/柔焦/半透明层\\n图形元素（同步音乐）：粉色速度线、玫瑰金半调、粉色准心HUD、发光矢量线、圆角框、扫描线、网格、几何装饰、花瓣粒子、闪光星尘、墨迹、噪点\\n单帧闪烁（每主节拍）：粉闪/白闪/故障帧/RGB分裂（洋红+青偏移）、色差、跳帧、频闪、文字交换、一帧扭曲\\n风格：高度响应，每帧有目的运动，紧凑构图，强视觉层次，完美节奏，电影级动态模糊，高端合成。日系原宿甜美+实验动画锐利，媲美顶尖MV文字设计\\n最后定格标题文字“Minimax H3 Studio”和“可视化素材管理，视频创作的正确打开方式”，\",\"roles\":\"\"}",
+        "mode": "Ref2VA - 全能参考模式",
+        "style_preset": "专业PV预告片 Pro PV/Trailer",
+        "duration": 5,
+        "width": 1344,
+        "height": 768,
+        "output_language": "English",
+        "ref_image_size": "match",
+        "h3_materials_view": ""
+      }
+    },
+    {
+      "id": 148,
+      "type": "MarkdownNote",
+      "pos": [
+        -2062.4641459428362,
+        5026.056815444295
+      ],
+      "size": [
+        1052.0716167968421,
+        297.80959516783423
+      ],
+      "flags": {},
+      "order": 9,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "title": "Note: Model Links",
+      "properties": {},
+      "widgets_values": [
+        "## Minimax H3 studio插件地址\n\nhttps://github.com/lepiai/ComfyUI-Minitools\n\n1、支持同一套工作流覆盖文生视频、首位帧视频、全能参考\n\n2、支持素材管理，鼠标点选或@调用素材\n\n3、支持接入大语言模型api，也支持本地ollama\n\n4、不接入大语言模型时，节点提示词直出（需要手动写或从其他地方复制）\n\n\n乐皮ai\n2026-08-28\n\n模型网盘：\n链接：https://pan.quark.cn/s/c5276cf0052d\n提取码：hN65"
+      ],
+      "widgets_values_named": {
+        "text": "## Minimax H3 studio插件地址\n\nhttps://github.com/lepiai/ComfyUI-Minitools\n\n1、支持同一套工作流覆盖文生视频、首位帧视频、全能参考\n\n2、支持素材管理，鼠标点选或@调用素材\n\n3、支持接入大语言模型api，也支持本地ollama\n\n4、不接入大语言模型时，节点提示词直出（需要手动写或从其他地方复制）\n\n\n乐皮ai\n2026-08-28\n\n模型网盘：\n链接：https://pan.quark.cn/s/c5276cf0052d\n提取码：hN65"
+      },
+      "color": "#222",
+      "bgcolor": "#000"
+    },
+    {
+      "id": 122,
+      "type": "LP-OpenAIClientConfig",
+      "pos": [
+        -1544.8364304992047,
+        6248.581906038915
+      ],
+      "size": [
+        282.3033203125,
+        178
+      ],
+      "flags": {},
+      "order": 10,
+      "mode": 4,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "llm_config",
+          "type": "H3_LLM_CONFIG",
+          "links": [
+            295
+          ]
+        }
+      ],
+      "properties": {
+        "aux_id": "lepiai/comfyui-minitools",
+        "ver": "c4bbbe69a171f8fc97201a0261ff43f4eb0c4bea",
+        "Node name for S&R": "LP-OpenAIClientConfig"
+      },
+      "widgets_values": [
+        "",
+        "https://llm-u7gau3h957ok5i0m.cn-beijing.maas.aliyuncs.com/compatible-mode/v1",
+        "kimi-k3",
+        8192,
+        false,
+        0.7
+      ],
+      "widgets_values_named": {
+        "api_key": "",
+        "base_url": "https://llm-u7gau3h957ok5i0m.cn-beijing.maas.aliyuncs.com/compatible-mode/v1",
+        "model": "kimi-k3",
+        "max_tokens": 8192,
+        "enable_thinking": false,
+        "temperature": 0.7
+      }
+    }
+  ],
+  "links": [
+    [
+      37,
+      6,
+      0,
+      32,
+      0,
+      "MODEL"
+    ],
+    [
+      199,
+      32,
+      0,
+      95,
+      0,
+      "MODEL"
+    ],
+    [
+      203,
+      95,
+      0,
+      78,
+      0,
+      "MODEL"
+    ],
+    [
+      230,
+      110,
+      0,
+      111,
+      0,
+      "FLOAT"
+    ],
+    [
+      236,
+      78,
+      0,
+      113,
+      0,
+      "MODEL"
+    ],
+    [
+      266,
+      127,
+      0,
+      129,
+      0,
+      "NOISE"
+    ],
+    [
+      267,
+      126,
+      0,
+      129,
+      1,
+      "GUIDER"
+    ],
+    [
+      268,
+      130,
+      0,
+      129,
+      2,
+      "SAMPLER"
+    ],
+    [
+      269,
+      128,
+      0,
+      129,
+      3,
+      "SIGMAS"
+    ],
+    [
+      271,
+      129,
+      0,
+      131,
+      0,
+      "LATENT"
+    ],
+    [
+      272,
+      11,
+      0,
+      131,
+      1,
+      "VAE"
+    ],
+    [
+      273,
+      129,
+      0,
+      132,
+      0,
+      "LATENT"
+    ],
+    [
+      274,
+      24,
+      0,
+      132,
+      1,
+      "VAE"
+    ],
+    [
+      277,
+      131,
+      0,
+      133,
+      0,
+      "IMAGE"
+    ],
+    [
+      278,
+      132,
+      0,
+      133,
+      1,
+      "AUDIO"
+    ],
+    [
+      283,
+      113,
+      0,
+      137,
+      0,
+      "MODEL"
+    ],
+    [
+      284,
+      137,
+      0,
+      126,
+      0,
+      "MODEL"
+    ],
+    [
+      285,
+      137,
+      0,
+      128,
+      0,
+      "MODEL"
+    ],
+    [
+      286,
+      111,
+      1,
+      137,
+      2,
+      "INT"
+    ],
+    [
+      292,
+      117,
+      1,
+      143,
+      6,
+      "INT"
+    ],
+    [
+      293,
+      117,
+      0,
+      143,
+      5,
+      "INT"
+    ],
+    [
+      294,
+      110,
+      0,
+      143,
+      4,
+      "FLOAT"
+    ],
+    [
+      295,
+      122,
+      0,
+      143,
+      3,
+      "H3_LLM_CONFIG"
+    ],
+    [
+      296,
+      24,
+      0,
+      143,
+      2,
+      "VAE"
+    ],
+    [
+      297,
+      11,
+      0,
+      143,
+      1,
+      "VAE"
+    ],
+    [
+      298,
+      13,
+      0,
+      143,
+      0,
+      "CLIP"
+    ],
+    [
+      299,
+      143,
+      0,
+      126,
+      1,
+      "CONDITIONING"
+    ],
+    [
+      300,
+      143,
+      1,
+      129,
+      4,
+      "LATENT"
+    ],
+    [
+      301,
+      143,
+      2,
+      134,
+      0,
+      "STRING"
+    ],
+    [
+      304,
+      111,
+      0,
+      136,
+      0,
+      "FLOAT"
+    ]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 0.5870774154372097,
+      "offset": [
+        3191.430527278131,
+        -5243.971914892361
+      ]
+    },
+    "frontendVersion": "1.49.6",
+    "VHS_latentpreview": false,
+    "VHS_latentpreviewrate": 0,
+    "VHS_MetadataImage": true,
+    "VHS_KeepIntermediate": true
+  },
+  "version": 0.4
+}
