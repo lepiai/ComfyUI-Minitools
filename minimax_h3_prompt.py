@@ -37,9 +37,14 @@ from .minimax_h3_presets import (
 # ====================== 配置常量 ======================
 DEFAULT_BASE_URL = "https://llm-u7gau3h957ok5i0m.cn-beijing.maas.aliyuncs.com/compatible-mode/v1"
 DEFAULT_MODEL = "qwen3.7-max-2026-05-20"
-MAX_RETRIES = 3
+MAX_RETRIES = 2
 MAX_TOKENS = 8192
-TIMEOUT = 120
+THINK_BUDGET = 8192        # 思考模式推理 token 补偿预算（自动加在 max_tokens 上）
+MAX_TOKENS_CEILING = 65536 # max_tokens 绝对上限（与 LLM Config 节点一致）
+TIMEOUT = 180         # 流式读超时：慢模型（如 27B）推理停顿可能 >60s，给足余量
+STREAM_TIMEOUT = 120  # 流式连接建立超时
+
+OUTPUT_LANG_OPTIONS = ["English", "中文"]
 
 # 视频参考处理参数
 VIDEO_FPS = 24
@@ -330,6 +335,154 @@ def parse_mentions(text, video_audio_labels=None, standalone_offset=0):
     return result
 
 
+# ====================== 显式音色绑定：解析 / 注入 / 强制执行 ======================
+_SENT_SPLIT_RE = re.compile(r'[。；;！!？?\n]')
+_PIC_TAG_RE = re.compile(r'<Picture\s+(\d+)>')
+_AUD_TAG_RE = re.compile(r'<Audio\s+(\d+)>')
+_SPEECH_HINT_RE = re.compile(r'说|唱|音色|配音|台词|旁白|口播|speak|says|saying|voice|timbre|vocal|sing|narrat|dialogue|line', re.IGNORECASE)
+
+
+def parse_explicit_voice_bindings(parsed_prompt):
+    """
+    从已解析的提示词中提取用户显式声明的 图<->音频 音色绑定。
+    规则：同一分句内出现一对 <Picture N> + <Audio M>（顺序不限），且该句含说话语义关键词，
+    即视为一条绑定声明。返回 [(picture_num, audio_num), ...]
+    """
+    if not parsed_prompt:
+        return []
+    tags = []
+    for m in _PIC_TAG_RE.finditer(parsed_prompt):
+        tags.append((m.start(), 'P', int(m.group(1))))
+    for m in _AUD_TAG_RE.finditer(parsed_prompt):
+        tags.append((m.start(), 'A', int(m.group(1))))
+    if not tags:
+        return []
+    tags.sort()
+    bindings = []
+    used_aud = set()
+    for pos, kind, num in tags:
+        if kind != 'P':
+            continue
+        best = None
+        for pos2, kind2, num2 in tags:
+            if kind2 != 'A' or num2 in used_aud:
+                continue
+            seg = parsed_prompt[min(pos, pos2):max(pos, pos2)]
+            if _SENT_SPLIT_RE.search(seg):
+                continue
+            dist = abs(pos2 - pos)
+            if best is None or dist < best[0]:
+                best = (dist, num2, pos2)
+        if best is None:
+            continue
+        sent_start = 0
+        for sep in _SENT_SPLIT_RE.finditer(parsed_prompt[:best[2]]):
+            sent_start = sep.end()
+        sent_end = len(parsed_prompt)
+        for sep in _SENT_SPLIT_RE.finditer(parsed_prompt, best[2]):
+            sent_end = sep.start()
+            break
+        sentence = parsed_prompt[sent_start:sent_end]
+        if not _SPEECH_HINT_RE.search(sentence):
+            continue
+        used_aud.add(best[1])
+        if (num, best[1]) not in bindings:
+            bindings.append((num, best[1]))
+    return bindings
+
+
+def build_binding_directive(bindings):
+    """将用户显式绑定声明转为不可忽视的英文强制指令"""
+    if not bindings:
+        return ""
+    lines = [
+        "MANDATORY VOICE BINDINGS (absolute user constraints — follow EXACTLY; swapping, reassigning, "
+        "or binding these voices to any other subject is a HARD ERROR):"
+    ]
+    for p, a in bindings:
+        lines.append(
+            f"- The character defined from <Picture {p}> MUST speak using the voice timbre referenced "
+            f"from <Audio {a}> — no other audio, no other subject."
+        )
+    lines.append(
+        "In subject_definitions this means '<Audio {a}> is the voice-timbre reference for <Subject N> (Sx)' "
+        "exactly as bound above; in dialogue lines the bound character cites 'referenced from <Audio {a}>' inline."
+    )
+    return "\n".join(lines)
+
+
+_SUBJ_DEF_RE = re.compile(r'<Subject\s+(\d+)>[^\n]{0,200}?<Picture\s+(\d+)>')
+_VOICE_DEF_RE = re.compile(r'<Audio\s+(\d+)>[^\n]{0,120}?voice-timbre reference for\s+<Subject\s+(\d+)>\s*\(S(\d+)\)')
+_INLINE_AUDIO_RE = re.compile(r'(\(S(\d+)\)[^\n]{0,200}?referenced from\s+<Audio\s+)(\d+)(>)')
+
+
+def enforce_voice_bindings(output, bindings):
+    """
+    确定性强制执行用户显式声明的音色绑定（不依赖 LLM 自觉）：
+    1. 从 subject_definitions 解析 <Subject N> <-> <Picture P> 映射
+    2. 解析当前 <Audio X> -> <Subject N> (Sx) 绑定
+    3. 与用户声明 (Picture P, Audio A) 对照，构建音频编号置换并全局应用
+    4. 逐条校正对话行内联 'referenced from <Audio X>' 的编号
+    返回 (修正后文本, 修正说明 或 None)
+    """
+    if not output or not bindings:
+        return output, None
+
+    subj_pic = {}
+    for m in _SUBJ_DEF_RE.finditer(output):
+        subj_pic.setdefault(int(m.group(1)), int(m.group(2)))
+
+    cur = {}
+    for m in _VOICE_DEF_RE.finditer(output):
+        a, s, spk = int(m.group(1)), int(m.group(2)), int(m.group(3))
+        cur[a] = s
+
+    if not subj_pic or not cur:
+        return output, None
+
+    want = {}
+    for p, a in bindings:
+        for s, sp in subj_pic.items():
+            if sp == p:
+                want[a] = s
+                break
+    if not want:
+        return output, None
+
+    perm = {}
+    for want_a, s in want.items():
+        cur_a = next((a for a, cs in cur.items() if cs == s), None)
+        if cur_a is not None and cur_a != want_a:
+            perm[cur_a] = want_a
+    if not perm:
+        return output, None
+
+    for new in perm.values():
+        if new in cur and new not in perm:
+            return output, None
+    if len(set(perm.values())) != len(perm):
+        return output, None
+
+    fixed = output
+    for old, new in perm.items():
+        fixed = fixed.replace(f'<Audio {old}>', f'<AudioTMP {new}>')
+    fixed = re.sub(r'<AudioTMP (\d+)>', r'<Audio \1>', fixed)
+    note = f"audio tags swapped per user bindings: {perm}"
+
+    spk_audio = {}
+    for m in _VOICE_DEF_RE.finditer(fixed):
+        spk_audio[int(m.group(3))] = int(m.group(1))
+
+    def fix_inline(m):
+        spk = int(m.group(2))
+        if spk in spk_audio and int(m.group(3)) != spk_audio[spk]:
+            return f'{m.group(1)}{spk_audio[spk]}{m.group(4)}'
+        return m.group(0)
+
+    fixed = _INLINE_AUDIO_RE.sub(fix_inline, fixed)
+    return fixed, note
+
+
 # ====================== 参考角色描述处理 ======================
 def parse_reference_roles(roles_text, image_count, audio_count, video_count,
                           video_audio_labels=None, standalone_offset=0):
@@ -388,13 +541,23 @@ def build_tag_inventory(image_count, video_infos, audio_count):
         lines.append(f"<Video {v}>: uploaded reference video {v}")
     for i in range(1, audio_count + 1):
         lines.append(f"<Audio {standalone_offset + i}>: standalone uploaded audio file {i}")
+    if audio_count > 0:
+        lines.append(
+            "Voice-binding rule: when the user assigns an <Audio N> tag as a character's speaking voice, "
+            "write in subject_definitions '<Audio N> is the voice-timbre reference for <Subject M> (Sx), "
+            "containing a spoken [language] vocal layer', and cite it inline in that character's dialogue "
+            "line as 'using the [voice adjectives] voice timbre referenced from <Audio N>'. "
+            "Never bind voices by speaking order alone — audio numbering follows upload order while "
+            "speaker IDs follow the order of vocal events, and the two may be deliberately different."
+        )
 
     lines.append("")
     lines.append(
-        "STRICT CONSTRAINT: The tags listed above are the ONLY reference tags that exist. "
-        "NEVER invent or reference any tag outside this list — e.g. if only <Picture 1> and <Picture 2> "
-        "are listed, writing <Picture 3> is FORBIDDEN. Every <Picture>/<Video>/<Audio> tag in your "
-        "entire output must come from this exact list, with identical numbering."
+        "STRICT CONSTRAINT: every <Picture>/<Video>/<Audio> tag in your output must come from the list above "
+        "with identical numbering — e.g. if only <Picture 1> and <Picture 2> are listed, writing <Picture 3> "
+        "is FORBIDDEN. <Subject N> labels are the one exception: you create them yourself for characters, "
+        "scenes, or styles abstracted from these assets (required for every speaking character), numbered in "
+        "your own definition order."
     )
 
     return "\n".join(lines), video_audio_labels, standalone_offset
@@ -414,19 +577,30 @@ def generate_frame_alignment(mode_key, duration):
 
 
 # ====================== 构建 System Prompt ======================
-def build_system_prompt(mode_key, style_key, has_images=False, has_videos=False, has_audios=False):
+def build_system_prompt(mode_key, style_key, has_images=False, has_videos=False, has_audios=False, output_language="English"):
     # 动态注入：基础提示词 + 专业参考文档（按素材类型选择）+ 风格预设
     contextual = build_contextual_prompt(mode_key, style_key, has_images, has_videos, has_audios)
 
     mode_template = MODE_TEMPLATES.get(mode_key, MODE_TEMPLATES["T2VA"])
     parts = [contextual, mode_template.get("format", "")]
 
+    if output_language == "中文":
+        parts.append(
+            "OUTPUT LANGUAGE: Write ALL descriptive content (integrated_multimodal_description, "
+            "detailed_description, overall_soundscape, non_diegetic_music, subject_definitions, summary, "
+            "retention_analysis, etc.) in natural Simplified Chinese. "
+            "However, keep the following in English unchanged: field names (e.g. integrated_multimodal_description:), "
+            "section headers, reference tags (<Picture 1>, <Video 2>, <Audio 3>), shot markers ([Shot 1]), "
+            "and timestamp formats (At 00:03.500). "
+            "The user will write their description in Chinese — produce the final prompt in Chinese directly."
+        )
+
     return "\n\n".join(p for p in parts if p)
 
 
 # ====================== 构建 User Prompt ======================
 def build_user_prompt(raw_prompt, mode_key, duration, image_count, audio_count, video_count,
-                      reference_roles_text, tag_inventory):
+                      reference_roles_text, tag_inventory, binding_directive=""):
     parts = []
 
     parts.append(f"Target video duration: {duration:.2f} seconds (1-15 second range).")
@@ -448,42 +622,180 @@ def build_user_prompt(raw_prompt, mode_key, duration, image_count, audio_count, 
     parts.append(raw_prompt)
     parts.append("")
 
+    if binding_directive:
+        parts.append(binding_directive)
+        parts.append("")
+
     parts.append("Please rewrite this description into a properly structured MiniMax H3 prompt following the format rules.")
-    parts.append("Make the description detailed, vivid, and professionally written for video generation.")
+    parts.append("The user's words are a creative seed: preserve their subject, action, reference intents and any exact "
+                 "text verbatim, but DESIGN every professional dimension they did not mention (emotional expression, "
+                 "camera angle, lighting, camera movement, narrative arc, rhythm, sound, music) according to the style "
+                 "guidelines — do not merely paraphrase their words.")
+    parts.append(f"Description length budget: scale to the {duration:.0f}-second duration, roughly "
+                 f"{int(duration * 23)}-{int(duration * 33)} English words for the main description field.")
     parts.append("All reference tags that appear in the user's description MUST appear in your output unchanged.")
 
     return "\n".join(parts)
 
 
-# ====================== 调用阿里百炼 ======================
-def call_bailian(api_key, base_url, model, system_prompt, user_prompt, max_tokens=None):
-    client = OpenAI(api_key=api_key, base_url=base_url, timeout=TIMEOUT)
+# ====================== 调用阿里百炼（流式输出 + 进度反馈） ======================
+def _check_interrupt():
+    """检查 ComfyUI 是否发出了中断信号"""
+    try:
+        import comfy.model_management as mm
+        if mm.processing_interrupted():
+            return True
+    except Exception:
+        pass
+    return False
+
+
+def _extract_unsupported_param(err_text):
+    """
+    错误自愈：从 API 400 报错中解析"不支持的参数名"。
+    兼容多种平台报错格式：
+    - 百炼:   Parameter 'temperature'=0.7 is not supported for kimi-k3 model.
+    - OpenAI: Unrecognized request argument supplied: temperature
+    - 通用:   temperature is not supported / Unknown parameter: temperature
+    返回参数名（如 "temperature"），无法识别时返回 None。
+    """
+    if not err_text:
+        return None
+    lowered = err_text.lower()
+    if not any(k in lowered for k in (
+        "not supported", "unsupported", "unrecognized", "unknown parameter",
+        "unknown argument", "invalid_parameter",
+    )):
+        return None
+    for pat in (
+        r"[Pp]arameter\s*'([^']+)'",
+        r"[Uu]nrecognized request argument supplied:\s*(\S+)",
+        r"[Uu]nknown (?:request )?(?:argument|parameter)[:\s]*'?([A-Za-z_][A-Za-z0-9_]*)",
+        r"\b([A-Za-z_][A-Za-z0-9_]*)\s+is not supported",
+    ):
+        m = re.search(pat, err_text)
+        if m:
+            return m.group(1)
+    return None
+
+
+def call_bailian(api_key, base_url, model, system_prompt, user_prompt, max_tokens=None, label="H3 Studio", enable_thinking=False, temperature=0.7):
+    """
+    流式调用百炼 API，实时输出进度到控制台。
+    - stream=True：逐 chunk 接收，有数据流就不会超时
+    - 每 200 tokens 打印一次进度
+    - chunk 间隙检查 ComfyUI 中断信号
+    - enable_thinking=False 时通过 extra_body 关闭思考模式（Qwen3 系列）
+    - temperature < 0 时不发送 temperature 参数
+    - 错误自愈：模型不支持某个参数（如 kimi-k3 不支持 temperature）时，
+      自动移除该参数并立即重试，不消耗重试次数
+    - 返回完整拼接结果（与之前非流式一致）
+    """
+    client = OpenAI(api_key=api_key, base_url=base_url, timeout=STREAM_TIMEOUT)
 
     if max_tokens is None:
         max_tokens = MAX_TOKENS
 
+    # 思考模式的推理 token 会挤占 max_tokens 预算，自动补偿额外空间，避免正文被截断
+    if enable_thinking:
+        max_tokens = min(max_tokens + THINK_BUDGET, MAX_TOKENS_CEILING)
+
+    # 可自愈参数：False 表示不发送该参数
+    send_flags = {
+        "max_tokens": True,
+        "temperature": temperature is not None and temperature >= 0,
+        "enable_thinking": True,
+    }
+
     last_err = None
-    for attempt in range(MAX_RETRIES):
+    attempt = 0
+    while attempt < MAX_RETRIES:
+        start_time = time.time()
         try:
-            resp = client.chat.completions.create(
+            parts = [f"max_tokens={max_tokens}" if send_flags["max_tokens"] else "max_tokens=默认"]
+            parts.append("思考模式" if enable_thinking else "直出模式")
+            parts.append(f"temp={temperature}" if send_flags["temperature"] else "temp=不发送")
+            print(f"[{label}] 开始调用 {model} ({', '.join(parts)})...")
+
+            kwargs = dict(
                 model=model,
                 messages=[
                     {"role": "system", "content": system_prompt},
                     {"role": "user", "content": user_prompt},
                 ],
-                max_tokens=max_tokens,
-                temperature=0.7,
+                stream=True,
+                timeout=TIMEOUT,
             )
-            content = resp.choices[0].message.content
+            if send_flags["max_tokens"]:
+                kwargs["max_tokens"] = max_tokens
+            if send_flags["enable_thinking"]:
+                kwargs["extra_body"] = {"enable_thinking": enable_thinking}
+            if send_flags["temperature"]:
+                kwargs["temperature"] = temperature
+
+            stream = client.chat.completions.create(**kwargs)
+
+            chunks = []
+            token_count = 0
+            next_milestone = 200
+            think_count = 0
+            next_think_milestone = 200
+
+            for chunk in stream:
+                # 检查中断
+                if _check_interrupt():
+                    print(f"[{label}] 用户中断，停止生成")
+                    stream.close()
+                    return None
+
+                if not chunk.choices:
+                    continue
+                delta = chunk.choices[0].delta
+                # 思考内容在 reasoning_content 字段，不计入正文，仅显示进度
+                reasoning = getattr(delta, "reasoning_content", None) or getattr(delta, "reasoning", None)
+                if reasoning:
+                    think_count += 1
+                    if think_count >= next_think_milestone:
+                        elapsed = time.time() - start_time
+                        print(f"[{label}] 思考中... {think_count} tokens ({elapsed:.0f}s)")
+                        next_think_milestone += 200
+                if delta and delta.content:
+                    chunks.append(delta.content)
+                    token_count += 1
+                    if token_count >= next_milestone:
+                        elapsed = time.time() - start_time
+                        print(f"[{label}] 生成中... {token_count} tokens ({elapsed:.0f}s)")
+                        next_milestone += 200
+
+            content = "".join(chunks).strip()
+            elapsed = time.time() - start_time
+
             if content:
-                return content.strip()
-            last_err = "Empty response"
+                think_note = f"，思考 {think_count} tokens" if think_count else ""
+                print(f"[{label}] 生成完成：{len(content)} 字符，约 {token_count} tokens{think_note}，耗时 {elapsed:.0f}s")
+                return content
+            last_err = "API 返回空内容"
+            print(f"[{label}] 第 {attempt + 1}/{MAX_RETRIES} 次失败（{elapsed:.0f}s）: {last_err}")
+
         except Exception as e:
             last_err = str(e)
+            # 错误自愈：解析"参数不支持"类 400 错误，移除后立即重试（不消耗重试次数）
+            bad_param = _extract_unsupported_param(last_err)
+            if bad_param and bad_param in send_flags and send_flags[bad_param]:
+                send_flags[bad_param] = False
+                print(f"[{label}] 错误自愈：模型 {model} 不支持参数 '{bad_param}'，已自动移除并重试")
+                continue
+            elapsed = time.time() - start_time
+            print(f"[{label}] 第 {attempt + 1}/{MAX_RETRIES} 次失败（{elapsed:.0f}s）: {str(e)[:200]}")
             logger.warning(f"API attempt {attempt + 1}/{MAX_RETRIES} failed: {e}")
-            if attempt < MAX_RETRIES - 1:
-                time.sleep(2 * (attempt + 1))
 
+        attempt += 1
+        if attempt < MAX_RETRIES:
+            wait = 2 * attempt
+            print(f"[{label}] {wait}s 后重试...")
+            time.sleep(wait)
+
+    print(f"[{label}] 全部重试失败: {str(last_err)[:200]}")
     logger.error(f"【全部重试失败】{last_err}")
     return None
 
@@ -502,7 +814,8 @@ def translate_to_chinese(api_key, base_url, model, h3_prompt, max_tokens=None):
         "Output ONLY the translated text, no explanations."
     )
     try:
-        return call_bailian(api_key, base_url, model, system, h3_prompt, max_tokens=max_tokens) or ""
+        trans_max = min(max_tokens or 4096, 4096)
+        return call_bailian(api_key, base_url, model, system, h3_prompt, max_tokens=trans_max, label="H3 翻译") or ""
     except Exception as e:
         logger.warning(f"Translation failed: {e}")
         return ""
@@ -641,14 +954,16 @@ def parse_h3_materials(value):
 
 # ====================== 节点定义 ======================
 def _resolve_llm_config(llm_config=None):
-    """从独立配置节点（OpenAIClientConfig）解析 api_key / model / base_url / max_tokens。
-    未连接配置节点时返回 (None, 默认model, 默认base_url, 默认max_tokens)。"""
+    """从独立配置节点（OpenAIClientConfig）解析 api_key / model / base_url / max_tokens / enable_thinking / temperature。
+    未连接配置节点时返回 (None, 默认model, 默认base_url, 默认max_tokens, False, 0.7)。"""
     if isinstance(llm_config, dict):
         return (llm_config.get("api_key") or "",
                 llm_config.get("model") or DEFAULT_MODEL,
                 llm_config.get("base_url") or DEFAULT_BASE_URL,
-                llm_config.get("max_tokens") or MAX_TOKENS)
-    return "", DEFAULT_MODEL, DEFAULT_BASE_URL, MAX_TOKENS
+                llm_config.get("max_tokens") or MAX_TOKENS,
+                llm_config.get("enable_thinking", False),
+                llm_config.get("temperature", 0.7))
+    return "", DEFAULT_MODEL, DEFAULT_BASE_URL, MAX_TOKENS, False, 0.7
 
 
 class OpenAIClientConfig:
@@ -665,6 +980,8 @@ class OpenAIClientConfig:
                 "base_url": ("STRING", {"default": DEFAULT_BASE_URL}),
                 "model": ("STRING", {"default": DEFAULT_MODEL}),
                 "max_tokens": ("INT", {"default": 8192, "min": 256, "max": 65536, "step": 256, "tooltip": "LLM 输出 token 上限。百炼/云端大模型建议 8192+；本地 ollama 小模型可按实际上下文窗口设置"}),
+                "enable_thinking": ("BOOLEAN", {"default": False, "tooltip": "思考模式开关。关闭可提速 40-60%（Qwen3 系列）；开启则模型先推理再输出，质量更高但更慢。百炼和 Ollama 均支持"}),
+                "temperature": ("FLOAT", {"default": 0.7, "min": -1.0, "max": 2.0, "step": 0.1, "tooltip": "生成随机性。0=确定性输出，1=较多变化。设为 -1 则不发送此参数；若模型不支持（如 kimi-k3）会自动移除并重试，无需手动处理"}),
             }
         }
 
@@ -675,10 +992,10 @@ class OpenAIClientConfig:
     OUTPUT_NODE = False
     DESCRIPTION = "独立 LLM 连接配置：api_key / base_url / model / max_tokens。base_url 遵循 OpenAI 兼容协议，可接入百炼、DeepSeek、OpenRouter、Ollama 等任何 OpenAI 兼容平台。"
 
-    def run(self, api_key, base_url, model, max_tokens):
+    def run(self, api_key, base_url, model, max_tokens, enable_thinking=False, temperature=0.7):
         base_url = base_url.strip() or DEFAULT_BASE_URL
         model = model.strip() or DEFAULT_MODEL
-        return ({"api_key": api_key, "base_url": base_url, "model": model, "max_tokens": max_tokens},)
+        return ({"api_key": api_key, "base_url": base_url, "model": model, "max_tokens": max_tokens, "enable_thinking": enable_thinking, "temperature": temperature},)
 
 
 class MiniMaxH3PromptOptimizer:
@@ -690,6 +1007,7 @@ class MiniMaxH3PromptOptimizer:
                 "mode": (MODE_OPTIONS,),
                 "style_preset": (STYLE_OPTIONS,),
                 "duration": ("FLOAT", {"default": 5.0, "min": 1.0, "max": 15.0, "step": 0.1}),
+                "output_language": (OUTPUT_LANG_OPTIONS, {"default": "English", "tooltip": "LLM 直出语言：English=英文提示词，中文=中文提示词（省去翻译步骤）"}),
             },
             "optional": {
                 "llm_config": ("H3_LLM_CONFIG",),
@@ -708,9 +1026,9 @@ class MiniMaxH3PromptOptimizer:
     所有输出打包为 H3_OUTPUT 管道，使用 MiniMax H3 Output Unpacker 节点拆包
     """
 
-    def run(self, h3_materials, mode, style_preset, duration, llm_config=None):
-        api_key, model, base_url, max_tokens = _resolve_llm_config(llm_config)
-        result = _run_prompt_pipeline(h3_materials, mode, style_preset, duration, api_key, model, base_url, max_tokens)
+    def run(self, h3_materials, mode, style_preset, duration, output_language="English", llm_config=None):
+        api_key, model, base_url, max_tokens, enable_thinking, temperature = _resolve_llm_config(llm_config)
+        result = _run_prompt_pipeline(h3_materials, mode, style_preset, duration, api_key, model, base_url, max_tokens, output_language, enable_thinking, temperature, label="H3 Optimizer")
 
         mode_key = result["mode_key"]
         img_tensors = result["img_tensors"]
@@ -745,7 +1063,7 @@ class MiniMaxH3PromptOptimizer:
             return standalone_audios[idx] if idx < len(standalone_audios) else None
 
         return _pack_output(
-            result["prompt"], result["prompt_zh"], result["description"],
+            result["prompt"], result["description"],
             result["soundscape"], result["music"],
             first_frame, last_frame, ref_images,
             pick_video, pick_video_audio, pick_audio,
@@ -763,7 +1081,7 @@ def _merge_passthrough(raw_prompt, parsed_roles):
     return "\n\n".join(parts)
 
 
-def _run_prompt_pipeline(h3_materials, mode, style_preset, duration, api_key, model, base_url, max_tokens=None):
+def _run_prompt_pipeline(h3_materials, mode, style_preset, duration, api_key, model, base_url, max_tokens=None, output_language="English", enable_thinking=False, temperature=0.7, label="H3 Studio"):
     """
     共享执行管线：素材加载 + @语法解析 + 百炼优化 + 幻觉标签净化 + 组装
     供 MiniMaxH3PromptOptimizer 与 MiniMaxH3Studio 共用
@@ -822,7 +1140,7 @@ def _run_prompt_pipeline(h3_materials, mode, style_preset, duration, api_key, mo
     if not api_key or not api_key.strip():
         passthrough = _merge_passthrough(raw_prompt, parsed_roles)
         result.update({
-            "prompt": passthrough, "prompt_zh": "",
+            "prompt": passthrough,
             "description": passthrough, "soundscape": "", "music": "",
         })
         return result
@@ -835,20 +1153,24 @@ def _run_prompt_pipeline(h3_materials, mode, style_preset, duration, api_key, mo
     has_images = image_count > 0
     has_videos = video_count > 0
     has_audios = audio_count > 0 or any(a is not None for a in video_audios)
-    system_prompt = build_system_prompt(mode_key, style_key, has_images, has_videos, has_audios)
+    system_prompt = build_system_prompt(mode_key, style_key, has_images, has_videos, has_audios, output_language)
+
+    # 6.0 解析用户显式声明的音色绑定，注入强制指令
+    explicit_bindings = parse_explicit_voice_bindings(raw_prompt)
+    binding_directive = build_binding_directive(explicit_bindings)
     user_prompt = build_user_prompt(
         raw_prompt, mode_key, duration,
         image_count, audio_count, video_count,
-        parsed_roles, tag_inventory
+        parsed_roles, tag_inventory, binding_directive
     )
 
-    output = call_bailian(api_key, base_url, model, system_prompt, user_prompt, max_tokens=max_tokens)
+    output = call_bailian(api_key, base_url, model, system_prompt, user_prompt, max_tokens=max_tokens, label=label, enable_thinking=enable_thinking, temperature=temperature)
 
     if output is None:
         logger.warning("API 调用失败，返回原始 prompt")
         passthrough = _merge_passthrough(raw_prompt, parsed_roles)
         result.update({
-            "prompt": passthrough, "prompt_zh": "",
+            "prompt": passthrough,
             "description": passthrough, "soundscape": "", "music": "",
         })
         return result
@@ -858,6 +1180,12 @@ def _run_prompt_pipeline(h3_materials, mode, style_preset, duration, api_key, mo
     output, removed_tags = sanitize_output_tags(
         output, image_count, video_count, audio_total
     )
+
+    # 6.6 确定性强制音色绑定（用户显式声明优先于 LLM 输出）
+    if explicit_bindings:
+        output, binding_fix = enforce_voice_bindings(output, explicit_bindings)
+        if binding_fix:
+            print(f"[{label}] 音色绑定校正: {binding_fix}")
 
     # 7. 解析输出
     parsed = parse_h3_output(output, mode_key)
@@ -893,23 +1221,19 @@ def _run_prompt_pipeline(h3_materials, mode, style_preset, duration, api_key, mo
         h3_prompt = output
         description = output
 
-    # 10. 翻译为中文（供检查）
-    prompt_zh = translate_to_chinese(api_key, base_url, model, h3_prompt, max_tokens=max_tokens) if h3_prompt else ""
-
     result.update({
-        "prompt": h3_prompt, "prompt_zh": prompt_zh,
+        "prompt": h3_prompt,
         "description": description, "soundscape": soundscape, "music": music,
     })
     return result
 
 
-def _pack_output(h3_prompt, prompt_zh, description, soundscape, music,
+def _pack_output(h3_prompt, description, soundscape, music,
                  first_frame, last_frame, ref_images,
                  pick_video, pick_video_audio, pick_audio):
     """将所有输出打包为 H3_OUTPUT dict"""
     return ({
         "prompt": h3_prompt,
-        "prompt_zh": prompt_zh,
         "description": description,
         "soundscape": soundscape,
         "music": music,
@@ -937,7 +1261,7 @@ class MiniMaxH3OutputUnpacker:
         }
 
     RETURN_TYPES = (
-        "STRING", "STRING",
+        "STRING",
         "IMAGE", "IMAGE",
         "IMAGE", "IMAGE", "IMAGE", "IMAGE", "IMAGE",
         "IMAGE", "IMAGE", "IMAGE", "IMAGE",
@@ -946,7 +1270,7 @@ class MiniMaxH3OutputUnpacker:
         "AUDIO", "AUDIO", "AUDIO",
     )
     RETURN_NAMES = (
-        "prompt", "prompt_zh",
+        "prompt",
         "first_frame", "last_frame",
         "ref_image_1", "ref_image_2", "ref_image_3", "ref_image_4", "ref_image_5",
         "ref_image_6", "ref_image_7", "ref_image_8", "ref_image_9",
@@ -969,7 +1293,6 @@ class MiniMaxH3OutputUnpacker:
 
         return (
             h3_output.get("prompt", ""),
-            h3_output.get("prompt_zh", ""),
             h3_output.get("first_frame"),
             h3_output.get("last_frame"),
             h3_output.get("ref_image_1"), h3_output.get("ref_image_2"), h3_output.get("ref_image_3"),
@@ -1021,6 +1344,7 @@ class MiniMaxH3Studio:
                 "duration": ("FLOAT", {"default": 5.0, "min": 1.0, "max": 15.0, "step": 0.1}),
                 "width": ("INT", {"default": 1344, "min": 32, "max": 16384, "step": 32}),
                 "height": ("INT", {"default": 768, "min": 32, "max": 16384, "step": 32}),
+                "output_language": (OUTPUT_LANG_OPTIONS, {"default": "English", "tooltip": "LLM 直出语言：English=英文提示词，中文=中文提示词（省去翻译步骤）"}),
             },
             "optional": {
                 "audio_vae": ("VAE", {"tooltip": "Ref2VA 模式包含音频素材时必填"}),
@@ -1029,8 +1353,8 @@ class MiniMaxH3Studio:
             }
         }
 
-    RETURN_TYPES = ("CONDITIONING", "LATENT", "STRING", "STRING")
-    RETURN_NAMES = ("positive", "latent", "prompt", "prompt_zh")
+    RETURN_TYPES = ("CONDITIONING", "LATENT", "STRING")
+    RETURN_NAMES = ("positive", "latent", "prompt")
     FUNCTION = "run"
     CATEGORY = "MiniTools"
     OUTPUT_NODE = False
@@ -1041,11 +1365,11 @@ class MiniMaxH3Studio:
     duration（秒）自动换算为官方 length（帧，17k+5 网格）
     """
 
-    def run(self, clip, vae, h3_materials, mode, style_preset, duration, width, height,
+    def run(self, clip, vae, h3_materials, mode, style_preset, duration, width, height, output_language="English",
             audio_vae=None, ref_image_size="match", llm_config=None):
         # 1. 共享管线：素材加载 + 百炼优化 + 组装 H3 提示词
-        api_key, model, base_url, max_tokens = _resolve_llm_config(llm_config)
-        result = _run_prompt_pipeline(h3_materials, mode, style_preset, duration, api_key, model, base_url, max_tokens)
+        api_key, model, base_url, max_tokens, enable_thinking, temperature = _resolve_llm_config(llm_config)
+        result = _run_prompt_pipeline(h3_materials, mode, style_preset, duration, api_key, model, base_url, max_tokens, output_language, enable_thinking, temperature)
 
         h3_prompt = (result.get("prompt") or "").strip()
         if not h3_prompt:
@@ -1107,4 +1431,4 @@ class MiniMaxH3Studio:
 
         # 3. 解包官方 NodeOutput（.args = (conditioning, latent)）
         cond, latent = out.args
-        return (cond, latent, h3_prompt, result.get("prompt_zh", ""))
+        return (cond, latent, h3_prompt)
