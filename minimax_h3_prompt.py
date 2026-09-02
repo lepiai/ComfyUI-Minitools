@@ -5,6 +5,7 @@ MiniMax H3 Prompt Optimizer ComfyUI Node
 使用阿里百炼 API 进行大模型调用
 内置素材上传 + 缩略图展示 + 点击插入参考标签
 输出端口与官方 MiniMaxH3ImageToVideo / MiniMaxH3ReferenceToVideo 节点对齐
+--@乐皮ai
 """
 
 import os
@@ -630,9 +631,15 @@ def build_user_prompt(raw_prompt, mode_key, duration, image_count, audio_count, 
     parts.append("The user's words are a creative seed: preserve their subject, action, reference intents and any exact "
                  "text verbatim, but DESIGN every professional dimension they did not mention (emotional expression, "
                  "camera angle, lighting, camera movement, narrative arc, rhythm, sound, music) according to the style "
-                 "guidelines — do not merely paraphrase their words.")
+                 "guidelines — do not merely paraphrase their words. Expansion never covers reference-derived visible "
+                 "content: everything shown inside uploaded images — character clothing, body features, colors, identity, "
+                 "scene environments, props, and style features — comes only from the user's own words; if not described, "
+                 "keep it neutral ('preserving its appearance and interior as shown in the reference') instead of "
+                 "inventing details.")
     parts.append(f"Description length budget: scale to the {duration:.0f}-second duration, roughly "
-                 f"{int(duration * 23)}-{int(duration * 33)} English words for the main description field.")
+                 f"{int(duration * 23)}-{int(duration * 33)} English words for the main description field. "
+                 "User-provided dialogue lines are EXEMPT from this budget — always keep every line verbatim and "
+                 "never trim or condense dialogue to fit; compress only non-dialogue prose.")
     parts.append("All reference tags that appear in the user's description MUST appear in your output unchanged.")
 
     return "\n".join(parts)

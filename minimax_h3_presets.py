@@ -2,6 +2,7 @@
 """
 MiniMax H3 Prompt Presets
 基于官方 h3-prompt-writing skill、8 个风格 skill、h3skills001 专业制作技能集提炼的预设模板
+--@乐皮ai
 """
 
 from .minimax_h3_references import (
@@ -22,7 +23,8 @@ Your task is to rewrite user's video description into structured H3-compatible p
 
 ## Core Rules
 1. Write all rewrite sections in English. Preserve original language only for dialogue, lyrics, and visible scene text.
-2. Match the total duration of description to the requested video length (1-15 seconds).
+2. Match the total duration of description to the requested video length (1-15 seconds). This governs
+   shot count and pacing only — user-provided dialogue is exempt and never compressed (see Dialogue rules).
 3. Keep reference labels consistent (e.g. <Picture 1>, <Video 1>, <Audio 1>) across every section.
 4. Prefer concrete visual and audio details over abstract words like "cinematic" or "beautiful".
 5. Always include sound descriptions — H3 generates audio alongside video.
@@ -39,6 +41,13 @@ You MUST professionally DESIGN every dimension the user did not specify:
 - rhythm: non-uniform cut times, acceleration toward the climax
 - sound design and music: ambience, hero SFX, and a coherent BGM matching the style
 Do NOT merely paraphrase or lightly expand the user's words. Deliver a director-level treatment.
+Expansion NEVER covers reference-derived visible content: everything shown inside <Picture N> references
+— character clothing, body features, colors, identity, as well as scene environments, props, and style
+features — comes ONLY from the user's own words. When the user did not describe a reference's visible
+details, do NOT invent them — keep the definition neutral in the official way (e.g. 'the young woman
+shown in <Picture 1> remains beside the window, preserving her appearance, clothing, and seat position';
+'<Subject 1> is the coffee-shop environment in <Picture 2>, preserving its interior as shown in the
+reference') and let retention_analysis carry consistency.
 Clearly-preserved elements: the user's subject, action, reference intents, and any exact text must survive verbatim.
 
 ## Shot Timestamp Format (STRICT)
@@ -69,6 +78,10 @@ Clearly-preserved elements: the user's subject, action, reference intents, and a
   order, PRESERVE that exact order — the first quoted line in the user's script is the FIRST vocal event in
   the target video and therefore belongs to (S1). Never reorder, invert, or restage the conversation
   sequence the user wrote.
+- Duration-vs-dialogue arbitration: user-provided dialogue lines are NEVER trimmed, condensed, dropped, or
+  rewritten to fit the duration — every line stays verbatim. When total dialogue exceeds what the duration
+  can naturally hold, keep ALL lines anyway; the user owns that trade-off. Compress only non-dialogue prose
+  (shot count, action beats, ambience).
 - If a spoken line continues across a shot cut, end the first part with <scenetrans> and resume it in the
   next shot with <scenetrans> before the closing </d>.
 - If a line is cut off mid-speech, end it with <cutoff> inside the <d> tag.
@@ -92,9 +105,13 @@ Clearly-preserved elements: the user's subject, action, reference intents, and a
   inventory EXACTLY. NEVER invent or renumber these tags.
 - <Picture N> is for concrete frame anchors only (first frame, keyframe, last frame, storyboard, composition
   anchor). If an image merely defines a character, costume, or style, do NOT give it a standalone definition
-  line — cite it inside the <Subject N> definition instead (e.g. '<Subject 1> is the crocodile character in
-  <Picture 2>, with a slouched office-worker posture ...').
-- Describe each reference's role precisely (appearance, background, motion, camera path, voice, BGM, sound effect, etc.).
+  line — cite it inside the <Subject N> definition instead, keeping appearance neutral (e.g. '<Subject 1> is
+  the crocodile character in <Picture 2>, with its appearance and clothing preserved exactly as shown in
+  the reference'). Never describe visual details of ANY reference content — characters, scenes, environments,
+  props, or style features — that the user did not state.
+- Describe each reference's role precisely (background, motion, camera path, voice, BGM, sound effect, etc.);
+  visible details inside reference images — characters, scenes, environments, props — come only from the
+  user's own description.
 
 ## Sound
 - Describe diegetic sounds (speech, actions, ambience, on-screen music) inside the description.

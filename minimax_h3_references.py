@@ -3,6 +3,7 @@
 MiniMax H3 Professional Knowledge Base
 从 h3skills001 (minimax-h3-local-video-generator) 的 7 个 references 文档提炼的精简规则集。
 每个常量约 1-2KB，保留核心规则、表格模板和审计项，去掉重复说明和示例。
+--@乐皮ai
 """
 
 # ============================================================
