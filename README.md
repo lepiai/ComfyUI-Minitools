@@ -40,4 +40,7 @@ git clone命令克隆本项目，即可完成所有节点的安装。
 在不适用llm接口的情况下，可以直接当作提示词编辑器离线使用，不走api来跑视频。
 <img width="858" height="756" alt="image" src="https://github.com/user-attachments/assets/a597e3fb-457d-4122-9958-eac93ff00f27" />
 
+9、image layer editor图层分层编辑，刚开始是用来支持Qwen-Image-Layered模型（原生支持生成带透明图层的图片分层）的，发现还有其他用途。
+本节点支持qwen image 2.1透明图层的编辑，结合扩展节点能与其他图片合成，支持合成图片以及输出分层图片（带rgba）
+<img width="1760" height="849" alt="image" src="https://github.com/user-attachments/assets/40090ec2-9588-4666-a25e-7ec0269a9e58" />
 
